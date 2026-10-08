@@ -28,5 +28,5 @@ try {
     const result = cp.spawnSync(plan.executable, plan.args, { cwd: plan.cwd, encoding: 'utf8', input: '互动 中文\n', timeout: 10000 });
     assert.equal(result.status, 0, result.stderr || String(result.error));
     assert.equal(result.stdout, '[空 格, $(no shell)]\n互动 中文\n');
-    console.log('PASS: ten snippets checked by actual Ru; Unicode/space/metacharacter paths, argv, and stdin round-trip through real interpreter.');
+    console.log('PASS: twelve snippets checked by actual Ru; Unicode/space/metacharacter paths, argv, and stdin round-trip through real interpreter.');
 } finally { fs.rmSync(temp, { recursive: true, force: true }); }

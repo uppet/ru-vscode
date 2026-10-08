@@ -1,10 +1,18 @@
 import * as vscode from 'vscode';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
+import { hoverAt } from './hover';
 import { buildLaunchPlan, RunSettings } from './launch';
 
 /** No subprocess is created during activation or while editing. */
 export function activate(context: vscode.ExtensionContext): void {
+    context.subscriptions.push(vscode.languages.registerHoverProvider('ru', {
+        provideHover(document, position) {
+            const result = hoverAt(document.getText(), document.offsetAt(position));
+            if (!result) { return undefined; }
+            return new vscode.Hover(result.text, new vscode.Range(document.positionAt(result.start), document.positionAt(result.end)));
+        }
+    }));
     const pending = new Set<string>();
     const running = new Map<string, vscode.Task>();
     context.subscriptions.push(vscode.tasks.onDidEndTask(event => {

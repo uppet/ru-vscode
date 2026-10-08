@@ -13,6 +13,7 @@ function setup(options = {}) {
         uri: { scheme: 'file', fsPath: file, toString: () => file },
         save: async () => { events.push('save'); document.isUntitled = false; document.isDirty = false; return true; }, ...options.document };
     const api = {
+        languages: { registerHoverProvider: () => ({ dispose() {} }) },
         window: { activeTextEditor: { document },
             showWarningMessage: async (...args) => { messages.push(args); return options.choice; },
             showInformationMessage: async m => { messages.push(m); }, showErrorMessage: async m => { messages.push(m); } },

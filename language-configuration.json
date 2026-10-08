@@ -1,6 +1,10 @@
 {
   "comments": {
-    "lineComment": "#"
+    "lineComment": "批.",
+    "blockComment": [
+      "解.",
+      "释."
+    ]
   },
   "brackets": [
     [

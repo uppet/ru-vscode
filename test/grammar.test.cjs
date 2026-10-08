@@ -63,3 +63,18 @@ test('conservative indentation handles common multiline block headers', () => {
     assert.ok(!decrease.test('为乐 取 1.'));
     assert.ok(!decrease.test('终 取 2.')); 
 });
+test('Chinese comments are adjacent markers, whole openers, nonnested, and string-safe', () => {
+    for (const dot of ['.', '。']) {
+        has(`批${dot} 显 1.`, '显', 'comment.line.ru');
+        has(`解${dot} 显 1. 释${dot} 显 2.`, '1', 'comment.block.ru');
+        const line = `解${dot} 解. '甲释${dot} 显 2.`;
+        assert.ok(scopes(line, line.lastIndexOf('显')).includes('keyword.control.ru'));
+        const stack = grammar.tokenizeLine(`解${dot} 批. // "`).ruleStack;
+        assert.ok(scopes('若', 0, stack).includes('comment.block.ru'));
+        assert.ok(scopes(`释${dot} 显 2.`, 3, stack).includes('keyword.control.ru'));
+        for (const quote of ["'", '"', '‘', '“']) has(`${quote}批${dot} 解${dot} 取`, '取', 'string.quoted.ru');
+    }
+    for (const name of ['甲批.', 'α解。', '_批.', '解说', '批注']) has(name, name.slice(0, -1), 'variable.other.ru');
+    has('批 . 显 1.', '批', 'variable.other.ru');
+    assert.deepEqual(require('../language-configuration.json').comments, { lineComment: '批.', blockComment: ['解.', '释.'] });
+});

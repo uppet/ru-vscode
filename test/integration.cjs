@@ -24,6 +24,21 @@ exports.run = async () => {
     const extension = vscode.extensions.getExtension('uppet.ru-vscode');
     assert.ok(extension); await extension.activate();
     assert.ok((await vscode.commands.getCommands()).includes('ru.runFile'));
+    const helpDocument = await vscode.workspace.openTextDocument({ language: 'ru', content: '值 取 1.\n显 值.' });
+    const editor = await vscode.window.showTextDocument(helpDocument);
+    const hovers = await vscode.commands.executeCommand('vscode.executeHoverProvider', helpDocument.uri, new vscode.Position(0, 2));
+    assert.ok(hovers.some(h => h.contents.some(c => c.value?.includes('非模块'))), 'registered lexical hover');
+    editor.selection = new vscode.Selection(0, 0, 0, 0);
+    await vscode.commands.executeCommand('editor.action.commentLine');
+    assert.match(helpDocument.getText(), /^批\./);
+    await vscode.commands.executeCommand('editor.action.commentLine');
+    assert.equal(helpDocument.getText(), '值 取 1.\n显 值.');
+    editor.selection = new vscode.Selection(0, 0, 1, 4);
+    await vscode.commands.executeCommand('editor.action.blockComment');
+    assert.ok(helpDocument.getText().includes('解.') && helpDocument.getText().includes('释.'));
+    await vscode.commands.executeCommand('editor.action.blockComment');
+    assert.equal(helpDocument.getText(), '值 取 1.\n显 值.');
+    await vscode.window.showTextDocument(document);
     const starts = [], ends = [];
     const listeners = [vscode.tasks.onDidStartTaskProcess(e => starts.push(e)), vscode.tasks.onDidEndTaskProcess(e => ends.push(e))];
     try {

@@ -5,7 +5,12 @@
   "patterns": [
     {
       "name": "comment.line.ru",
-      "match": "(#|//).*$"
+      "match": "(#|//|(?<![\\p{L}\\p{N}_])批[.。]).*$"
+    },
+    {
+      "name": "comment.block.ru",
+      "begin": "(?<![\\p{L}\\p{N}_])解[.。]",
+      "end": "释[.。]"
     },
     {
       "name": "string.quoted.ru",
