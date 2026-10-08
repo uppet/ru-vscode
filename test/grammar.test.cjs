@@ -1,0 +1,65 @@
+const { test, before } = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const tm = require('vscode-textmate');
+const onig = require('vscode-oniguruma');
+let grammar;
+before(async () => {
+    const wasm = fs.readFileSync(require.resolve('vscode-oniguruma/release/onig.wasm'));
+    await onig.loadWASM(wasm.buffer.slice(wasm.byteOffset, wasm.byteOffset + wasm.byteLength));
+    const registry = new tm.Registry({ onigLib: Promise.resolve({ createOnigScanner: p => new onig.OnigScanner(p), createOnigString: s => new onig.OnigString(s) }),
+        loadGrammar: async () => tm.parseRawGrammar(fs.readFileSync(path.join(__dirname, '../syntaxes/ru.tmLanguage.json'), 'utf8'), 'ru.json') });
+    grammar = await registry.loadGrammar('source.ru');
+});
+function scopes(line, index, stack) { return grammar.tokenizeLine(line, stack).tokens.find(t => t.startIndex <= index && t.endIndex > index).scopes; }
+function has(line, fragment, scope) { assert.ok(scopes(line, line.indexOf(fragment)).includes(scope), `${fragment} in ${line}: ${scopes(line, line.indexOf(fragment))}`); }
+test('keywords use full Unicode identifier boundaries', () => {
+    for (const id of ['为乐', '显值', '算子', '取3', '_若', 'α算', '算²', '形状']) { has(id, id, 'variable.other.ru'); }
+    has('若 值 则', '若', 'keyword.control.ru');
+    has('若 值 则', '则', 'keyword.control.ru');
+});
+test('named and anonymous functions, references, and closers', () => {
+    has('算 平方 值 为 数:', '平方', 'entity.name.function.ru');
+    has('算 元初 外参 为 句 阵:', '元初', 'entity.name.function.ru');
+    has('平方 取 算 值 为 数: 得 值*值. 法.', '值', 'variable.other.ru');
+    has('算 名.', '名', 'variable.other.ru');
+    has('作 名字:', '名字', 'entity.name.function.ru');
+    for (const word of ['法', '然', '环', '象']) { has(word, word, 'keyword.control.ru'); }
+    has('为.', '为', 'keyword.operator.word.ru');
+    has('终.', '终', 'keyword.control.end.ru');
+    has('终 取 2.', '终', 'variable.other.ru');
+    has('列 其 段 始:0 终:2.', '终', 'variable.other.ru');
+});
+test('all four quote pairs, multiline strings, and escapes', () => {
+    for (const [a, z] of [["'", "'"], ['"', '"'], ['‘', '’'], ['“', '”']]) {
+        has(`${a}# 若 // 法 ${z}`, '若', 'string.quoted.ru');
+        const state = grammar.tokenizeLine(`${a}first`).ruleStack;
+        assert.ok(scopes(`然 ${z} 显 2.`, 0, state).includes('string.quoted.ru'));
+        assert.ok(scopes(`然 ${z} 显 2.`, 4, state).includes('keyword.control.ru'));
+    }
+    has('"ok\\n"', '\\n', 'constant.character.escape.ru');
+    has('"bad\\q"', '\\q', 'invalid.illegal.escape.ru');
+    has('“escaped \\” yes”', '\\”', 'constant.character.escape.ru');
+});
+test('comments and division have distinct scopes', () => {
+    has('值 / 2. // 算', '/', 'keyword.operator.ru');
+    has('值 / 2. // 算', '算', 'comment.line.ru');
+    has('# “nothing”', 'nothing', 'comment.line.ru');
+});
+test('numbers and full width punctuation', () => {
+    for (const n of ['1', '2.5', '.5', '1e3', '2.5E-1']) { has(`显 ${n}.`, n, 'constant.numeric.ru'); }
+    has('显 1.', '.', 'punctuation.separator.ru');
+    has('显 （［1，2］）。', '（', 'punctuation.section.brackets.ru');
+    has('显 （［1，2］）。', '，', 'punctuation.separator.ru');
+});
+test('conservative indentation handles common multiline block headers', () => {
+    const config = require('../language-configuration.json');
+    const increase = new RegExp(config.indentationRules.increaseIndentPattern);
+    const decrease = new RegExp(config.indentationRules.decreaseIndentPattern);
+    for (const line of ['算 平方 值 为 数:', '作 问候:', '形 点:', '若 条件 则', '循', '循 10 次', '试:', '救 原因:', '另', '平方 取 算 值 为 数:', '报到 取 作:']) { assert.ok(increase.test(line), line); }
+    for (const line of ['# 算 平方:', '显 "算 平方:".', '为乐 取 2.', '算 名.', '显 1.']) { assert.ok(!increase.test(line), line); }
+    for (const line of ['法', '为.', '象', '然', '环', '终.', '另', '救 原因:']) { assert.ok(decrease.test(line), line); }
+    assert.ok(!decrease.test('为乐 取 1.'));
+    assert.ok(!decrease.test('终 取 2.')); 
+});

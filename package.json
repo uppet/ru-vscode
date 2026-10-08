@@ -1,0 +1,178 @@
+{
+  "name": "ru-vscode",
+  "displayName": "如言 · Ru",
+  "description": "如言 language support: syntax highlighting, snippets, and interactive Run Current File.",
+  "version": "0.1.0",
+  "publisher": "uppet",
+  "license": "UNLICENSED",
+  "private": true,
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Snippets"
+  ],
+  "keywords": [
+    "ru",
+    "如言",
+    "如语言"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/uppet/ru-vscode.git"
+  },
+  "main": "./out/extension.js",
+  "extensionKind": [
+    "workspace"
+  ],
+  "activationEvents": [
+    "onLanguage:ru"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": "limited",
+      "description": "Highlighting and snippets work; running code requires a trusted workspace.",
+      "restrictedConfigurations": [
+        "ru.interpreterPath",
+        "ru.interpreterArguments",
+        "ru.cliPath",
+        "ru.workingDirectory",
+        "ru.programArguments"
+      ]
+    },
+    "virtualWorkspaces": {
+      "supported": false,
+      "description": "Running Ru requires files on a local or remote extension-host filesystem."
+    }
+  },
+  "contributes": {
+    "languages": [
+      {
+        "id": "ru",
+        "aliases": [
+          "如言",
+          "Ru",
+          "ru"
+        ],
+        "extensions": [
+          ".ru"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "ru",
+        "scopeName": "source.ru",
+        "path": "./syntaxes/ru.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "ru",
+        "path": "./snippets/ru.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "ru.runFile",
+        "title": "如言: 运行当前文件 (Run Current File)",
+        "icon": "$(play)",
+        "enablement": "editorLangId == ru && isWorkspaceTrusted"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "ru.runFile",
+        "key": "ctrl+alt+r",
+        "mac": "cmd+alt+r",
+        "when": "editorTextFocus && editorLangId == ru && isWorkspaceTrusted"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "ru.runFile",
+          "when": "resourceLangId == ru && isWorkspaceTrusted",
+          "group": "navigation"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "ru.runFile",
+          "when": "editorLangId == ru && isWorkspaceTrusted",
+          "group": "navigation"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "如言 · Ru",
+      "properties": {
+        "ru.interpreterPath": {
+          "type": "string",
+          "default": "",
+          "description": "Python 3.10+ executable (no shell syntax). Empty: python3 on macOS/Linux, python on Windows.",
+          "scope": "resource"
+        },
+        "ru.interpreterArguments": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "-u"
+          ],
+          "description": "Arguments passed separately before the Ru CLI; -u keeps interactive output unbuffered.",
+          "scope": "resource"
+        },
+        "ru.cliPath": {
+          "type": "string",
+          "default": "",
+          "description": "Absolute path to the ru-language repository’s ru script. Empty uses python -m rulang. Supports ${workspaceFolder} and ${fileDirname}.",
+          "scope": "resource"
+        },
+        "ru.workingDirectory": {
+          "type": "string",
+          "default": "${fileDirname}",
+          "description": "Run directory. Supports ${fileDirname} and ${workspaceFolder}; relative paths resolve from the current file’s workspace folder (or its directory).",
+          "scope": "resource"
+        },
+        "ru.programArguments": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Arguments passed to 元初 after --, one array item per argument. Never interpreted by a shell.",
+          "scope": "resource"
+        }
+      }
+    },
+    "configurationDefaults": {
+      "[ru]": {
+        "editor.tabSize": 4,
+        "editor.insertSpaces": true
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p .",
+    "lint": "tsc -p . --noEmit && node scripts/validate.cjs",
+    "test": "npm run compile && node --test test/*.test.cjs",
+    "test:integration": "npm run compile && node test/run-integration.cjs",
+    "vscode:prepublish": "npm run compile",
+    "package": "vsce package --no-dependencies --out ru-vscode-0.1.0.vsix",
+    "check": "npm run lint && npm test && npm run package",
+    "test:ru": "npm run compile && node test/real-ru-smoke.cjs"
+  },
+  "devDependencies": {
+    "@types/node": "22.18.6",
+    "@types/vscode": "1.90.0",
+    "@vscode/test-electron": "3.1.0",
+    "@vscode/vsce": "4.0.0",
+    "typescript": "5.9.3",
+    "vscode-oniguruma": "2.0.1",
+    "vscode-textmate": "9.2.0"
+  }
+}

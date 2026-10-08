@@ -1,0 +1,13 @@
+.vscode/**
+.github/**
+.vscode-test/**
+node_modules/**
+src/**
+test/**
+scripts/**
+.gitignore
+package-lock.json
+tsconfig.json
+out/**/*.map
+*.vsix
+VALIDATION.md

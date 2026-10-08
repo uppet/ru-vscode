@@ -1,0 +1,133 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "如言",
+  "scopeName": "source.ru",
+  "patterns": [
+    {
+      "name": "comment.line.ru",
+      "match": "(#|//).*$"
+    },
+    {
+      "name": "string.quoted.ru",
+      "begin": "'",
+      "end": "'",
+      "patterns": [
+        {
+          "name": "constant.character.escape.ru",
+          "match": "\\\\[nrt\\\\\\'\"’”]"
+        },
+        {
+          "name": "invalid.illegal.escape.ru",
+          "match": "\\\\."
+        }
+      ]
+    },
+    {
+      "name": "string.quoted.ru",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        {
+          "name": "constant.character.escape.ru",
+          "match": "\\\\[nrt\\\\\\'\"’”]"
+        },
+        {
+          "name": "invalid.illegal.escape.ru",
+          "match": "\\\\."
+        }
+      ]
+    },
+    {
+      "name": "string.quoted.ru",
+      "begin": "‘",
+      "end": "’",
+      "patterns": [
+        {
+          "name": "constant.character.escape.ru",
+          "match": "\\\\[nrt\\\\\\'\"’”]"
+        },
+        {
+          "name": "invalid.illegal.escape.ru",
+          "match": "\\\\."
+        }
+      ]
+    },
+    {
+      "name": "string.quoted.ru",
+      "begin": "“",
+      "end": "”",
+      "patterns": [
+        {
+          "name": "constant.character.escape.ru",
+          "match": "\\\\[nrt\\\\\\'\"’”]"
+        },
+        {
+          "name": "invalid.illegal.escape.ru",
+          "match": "\\\\."
+        }
+      ]
+    },
+    {
+      "match": "(?<![\\p{L}\\p{N}_])(形)\\s+([\\p{L}_][\\p{L}\\p{N}_]*)",
+      "captures": {
+        "1": {
+          "name": "keyword.declaration.ru"
+        },
+        "2": {
+          "name": "entity.name.type.ru"
+        }
+      }
+    },
+    {
+      "match": "(?<![\\p{L}\\p{N}_])(算|作)\\s+([\\p{L}_][\\p{L}\\p{N}_]*)(?=\\s*[:：]|\\s+[\\p{L}_][\\p{L}\\p{N}_]*\\s+为(?![\\p{L}\\p{N}_]))",
+      "captures": {
+        "1": {
+          "name": "keyword.declaration.ru"
+        },
+        "2": {
+          "name": "entity.name.function.ru"
+        }
+      }
+    },
+    {
+      "name": "constant.numeric.ru",
+      "match": "(?<![\\p{L}\\p{N}_])(?:[0-9]+(?:\\.[0-9]+)?|\\.[0-9]+)(?:[eE][+-]?[0-9]+)?(?![\\p{L}\\p{N}_])"
+    },
+    {
+      "name": "constant.language.ru",
+      "match": "(?<![\\p{L}\\p{N}_])空(?![\\p{L}\\p{N}_])"
+    },
+    {
+      "name": "keyword.operator.word.ru",
+      "match": "(?<![\\p{L}\\p{N}_])(?:且|或|非|其|对|取|为)(?![\\p{L}\\p{N}_])"
+    },
+    {
+      "name": "keyword.control.ru",
+      "match": "(?<![\\p{L}\\p{N}_])(?:显|得|破|若|则|另|然|循|次|环|算|作|法|形|象|如|新|外言|尽|试|救|卒)(?![\\p{L}\\p{N}_])"
+    },
+    {
+      "name": "keyword.control.end.ru",
+      "match": "^\\s*终(?=\\s*(?:[.。]|#|//|$))"
+    },
+    {
+      "name": "support.function.builtin.ru",
+      "match": "(?<![\\p{L}\\p{N}_])(?:读|件|录|件作成果|读取|显出|错误|__竞赛)(?![\\p{L}\\p{N}_])"
+    },
+    {
+      "name": "keyword.operator.ru",
+      "match": "==|!=|<=|>=|[+*/%<>=@-]"
+    },
+    {
+      "name": "punctuation.section.brackets.ru",
+      "match": "[()\\[\\]（）［］]"
+    },
+    {
+      "name": "punctuation.separator.ru",
+      "match": "[,.：:。，]"
+    },
+    {
+      "name": "variable.other.ru",
+      "match": "[\\p{L}_][\\p{L}\\p{N}_]*"
+    }
+  ]
+}

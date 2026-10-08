@@ -1,0 +1,127 @@
+{
+  "comments": {
+    "lineComment": "#"
+  },
+  "brackets": [
+    [
+      "(",
+      ")"
+    ],
+    [
+      "[",
+      "]"
+    ],
+    [
+      "（",
+      "）"
+    ],
+    [
+      "［",
+      "］"
+    ]
+  ],
+  "autoClosingPairs": [
+    {
+      "open": "(",
+      "close": ")",
+      "notIn": [
+        "string",
+        "comment"
+      ]
+    },
+    {
+      "open": "[",
+      "close": "]",
+      "notIn": [
+        "string",
+        "comment"
+      ]
+    },
+    {
+      "open": "（",
+      "close": "）",
+      "notIn": [
+        "string",
+        "comment"
+      ]
+    },
+    {
+      "open": "［",
+      "close": "］",
+      "notIn": [
+        "string",
+        "comment"
+      ]
+    },
+    {
+      "open": "\"",
+      "close": "\"",
+      "notIn": [
+        "string",
+        "comment"
+      ]
+    },
+    {
+      "open": "'",
+      "close": "'",
+      "notIn": [
+        "string",
+        "comment"
+      ]
+    },
+    {
+      "open": "‘",
+      "close": "’",
+      "notIn": [
+        "string",
+        "comment"
+      ]
+    },
+    {
+      "open": "“",
+      "close": "”",
+      "notIn": [
+        "string",
+        "comment"
+      ]
+    }
+  ],
+  "surroundingPairs": [
+    [
+      "(",
+      ")"
+    ],
+    [
+      "[",
+      "]"
+    ],
+    [
+      "（",
+      "）"
+    ],
+    [
+      "［",
+      "］"
+    ],
+    [
+      "\"",
+      "\""
+    ],
+    [
+      "'",
+      "'"
+    ],
+    [
+      "‘",
+      "’"
+    ],
+    [
+      "“",
+      "”"
+    ]
+  ],
+  "indentationRules": {
+    "increaseIndentPattern": "^\\s*(?:(?:算|作|形)\\s+[^#'\"‘“]*[:：]|[^#'\"‘“]*\\s取\\s+(?:算|作)(?:\\s+[^#'\"‘“]*)?[:：]|若\\s+[^#'\"‘“]*\\s则|循(?:\\s+[^#'\"‘“]*\\s次)?|试\\s*[:：]?|救\\s+[^#'\"‘“:：]+[:：]?|另)\\s*(?:(?:#|//).*)?$",
+    "decreaseIndentPattern": "^\\s*(?:(?:法|为|象|然|环|终)(?=\\s*(?:[.。,，)）\\]］]|#|//|$))|另(?=\\s|$)|救\\s)"
+  }
+}
