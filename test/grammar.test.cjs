@@ -78,3 +78,18 @@ test('Chinese comments are adjacent markers, whole openers, nonnested, and strin
     has('批 . 显 1.', '批', 'variable.other.ru');
     assert.deepEqual(require('../language-configuration.json').comments, { lineComment: '批.', blockComment: ['解.', '释.'] });
 });
+test('完 is a whole statement keyword, never a block delimiter', () => {
+    const config = require('../language-configuration.json');
+    for (const dot of ['.', '。']) {
+        has(`完${dot}`, '完', 'keyword.control.ru');
+        assert.ok(!new RegExp(config.indentationRules.decreaseIndentPattern).test(`完${dot}`));
+        assert.ok(!new RegExp(config.indentationRules.increaseIndentPattern).test(`完${dot}`));
+        for (const prefix of ['# ', '// ', '批. ', '批。 ']) has(prefix + `完${dot}`, '完', 'comment.line.ru');
+        has(`解. 完${dot} 释.`, '完', 'comment.block.ru');
+        for (const [a, z] of [["'", "'"], ['"', '"'], ['‘', '’'], ['“', '”']]) has(a + `完${dot}` + z, '完', 'string.quoted.ru');
+    }
+    for (const id of ['完成', '完2', '未完', '_完', 'α完', '𠀀完', '完²']) has(id, id, 'variable.other.ru');
+    has('得 1.', '得', 'keyword.control.ru');
+    const snippet = require('../snippets/ru.json')['过程提前结束'];
+    assert.deepEqual(snippet.body, ['完.', '$0']);
+});

@@ -38,6 +38,14 @@ exports.run = async () => {
     assert.ok(helpDocument.getText().includes('解.') && helpDocument.getText().includes('释.'));
     await vscode.commands.executeCommand('editor.action.blockComment');
     assert.equal(helpDocument.getText(), '值 取 1.\n显 值.');
+    const finishDocument = await vscode.workspace.openTextDocument({ language: 'ru', content: '作 处理:\n    完。\n为\n批. 完.\n完成 取 1.' });
+    await vscode.window.showTextDocument(finishDocument);
+    const finishHovers = await vscode.commands.executeCommand('vscode.executeHoverProvider', finishDocument.uri, new vscode.Position(1, 4));
+    assert.ok(finishHovers.some(h => h.contents.some(c => c.value?.includes('返回空'))), 'registered procedure finish hover');
+    for (const position of [new vscode.Position(3, 3), new vscode.Position(4, 0)]) {
+        const hidden = await vscode.commands.executeCommand('vscode.executeHoverProvider', finishDocument.uri, position);
+        assert.ok(!hidden.some(h => h.contents.some(c => c.value?.includes('完：'))), 'no finish hover in comments or larger identifiers');
+    }
     await vscode.window.showTextDocument(document);
     const starts = [], ends = [];
     const listeners = [vscode.tasks.onDidStartTaskProcess(e => starts.push(e)), vscode.tasks.onDidEndTaskProcess(e => ends.push(e))];

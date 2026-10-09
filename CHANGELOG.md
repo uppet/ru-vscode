@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.1
+
+- Add Ru 0.8.0 procedure exit statement 完. / 完。 highlighting, snippet and lexical hover help.
+- Document that explicit and natural procedure completion both return 空; 算 / 得 is unchanged.
+- Keep 完 out of block delimiters and indentation; preserve Unicode identifiers, comments, strings and runner protections.
+
 ## 0.2.0
 
 - Align with Ru 0.7.0: Chinese line/block comments, comment toggles and two new snippets.

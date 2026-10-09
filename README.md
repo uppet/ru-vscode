@@ -10,11 +10,11 @@
 - 编辑器右上角 ▶、命令面板“如言: 运行当前文件”，以及 **Ctrl+Alt+R**（macOS：**Cmd+Option+R**）。
 - 在 VS Code 任务终端运行：保留 stdin、stdout、stderr 和退出状态，支持交互输入与 Ctrl+C。
 
-对应如语言规范 **0.7.0**。扩展不包含解释器；没有 LSP、语义诊断、补全服务或调试器。
+对应如语言规范 **0.8.0**。扩展不包含解释器；没有 LSP、语义诊断、补全服务或调试器。
 
 ## 安装
 
-1. 在扩展视图的 `…` 菜单选择 **Install from VSIX…**，选择 `ru-vscode-0.2.0.vsix`。
+1. 在扩展视图的 `…` 菜单选择 **Install from VSIX…**，选择 `ru-vscode-0.2.1.vsix`。
 2. 安装 Python 3.10+，准备如言工具链。
 3. 在设置中搜索 `ru.cliPath`，设为语言仓库根目录的 **ru 文件**的绝对路径，而不是目录、`ru.cmd` 或 Python 文件夹。
 
@@ -37,6 +37,12 @@ Windows 示例：
 ```
 
 若该 Python 环境已能执行 `python3 -m rulang`，`ru.cliPath` 可以留空。Windows 默认解释器名为 `python`，其他系统为 `python3`。路径不要额外加 shell 引号；空格和中文原样填写。扩展不会从源码目录自动寻找或执行一个叫 `ru` 的文件。
+
+## 过程提前结束（Ru 0.8.0+）
+
+在当前 `作` 内写 `完.` 或 `完。`，提前正常结束并返回 `空`；不带表达式。自然执行到 `作` 末尾也返回 `空`，不再返回空句 `''`。`完` 是语句，块仍用 `为` 收尾；它不会让编辑器减少缩进。仅能结束当前过程，不能用于顶层或嵌套的 `算`；`算` 的 `得` 返回规则保持不变。
+
+输入 `wan` / `完` 可插入提前结束语句，悬停 `完` / `作` 可查看规则。扩展只提供编辑支持；运行这些语义须单独更新解释器到 **Ru 0.8.0 或更高版本**，安装 VSIX 不会升级解释器。旧版按空句判断过程结果的代码需要改为按 `空` 判断。
 
 ## 注释、类型与悬浮提示
 
@@ -89,7 +95,7 @@ npm ci --ignore-scripts
 npm run lint
 npm test
 npm run package
-# 可选：对另一个仓库的真实如工具链验证十二个模板与 stdin / argv
+# 可选：对另一个仓库的真实如工具链验证十三个模板与 stdin / argv
 RU_LANGUAGE_ROOT=/path/to/ru-language npm run test:ru
 # 真实 VS Code 扩展宿主测试；Linux 需要显示服务器
 xvfb-run -a npm run test:integration
