@@ -39,5 +39,9 @@ try {
     const optional = cp.spawnSync(plan.executable, plan.args, { cwd: plan.cwd, encoding: 'utf8', timeout: 10000 });
     assert.equal(optional.status, 0, optional.stderr || String(optional.error));
     assert.equal(optional.stdout, '空\n空\n空\n空\n');
+    fs.writeFileSync(file, "算 回 值: 得 值. 法\n显 算 回 值:1.\n变量 取 2. 算 回 变量. 算 回 值:3.\n作 报 内容: 显 内容. 为\n作 报 内容:'好'.\n");
+    const references = cp.spawnSync(plan.executable, plan.args, { cwd: plan.cwd, encoding: 'utf8', timeout: 10000 });
+    assert.equal(references.status, 0, references.stderr || String(references.error));
+    assert.equal(references.stdout, '1\n好\n');
     console.log('PASS: eighteen snippets checked by actual Ru; Unicode/space/metacharacter paths, argv, stdin, and explicit/natural procedure completion through real interpreter.');
 } finally { fs.rmSync(temp, { recursive: true, force: true }); }
