@@ -105,3 +105,49 @@ test('RU008 optional and mixed declaration parameters keep names distinct from a
     const increase = new RegExp(require('../language-configuration.json').indentationRules.increaseIndentPattern);
     for (const line of ['算 原样 值:', '作 原样 值:', '回调 取 算 值:', '回调 取 作 值:', '算 选择 值, 次数 为 数:']) assert.ok(increase.test(line), line);
 });
+test('facts and map delimiters use whole identifiers and preserve comments and nested functions', () => {
+    for (const word of ['真', '假']) has(`显 ${word}.`, word, 'constant.language.ru');
+    has('算 判断 值 为 事实:', '事实', 'storage.type.ru');
+    has('算 查询 表 为 典:', '典', 'storage.type.ru');
+    for (const word of ['典', '成']) has('表 取 典: ‘上’ 对 0. 成.', word, 'keyword.control.ru');
+    for (const id of ['字典', '完成', '典藏', '成2', 'α成', '𠀀成', '事实值', '真假', '真实', '假²']) has(id, id, 'variable.other.ru');
+    for (const word of ['查', '增', '除', '列', '同', '印']) has(`表 其 ${word}.`, word, 'variable.other.ru');
+    has('表 取 典: ‘成’ 对 算 值: 得 值. 法. 成.', '值', 'variable.other.ru');
+    has('表 取 典: ‘成’ 对 作 值: 完. 为. 成.', '完', 'keyword.control.ru');
+    for (const line of ['# 典 成 真 假 事实', '批. 典 成 真 假 事实', '解. 典 成 真 假 事实 释.']) {
+        for (const word of ['典', '成', '真', '假', '事实']) assert.ok(scopes(line, line.indexOf(word)).some(x => x.startsWith('comment.')));
+    }
+    for (const [a,z] of [["'","'"], ['"','"'], ['‘','’'], ['“','”']]) {
+        for (const word of ['典','成','真','假','事实']) has(`${a}${word}${z}`,word,'string.quoted.ru');
+    }
+});
+test('maps have paired block indentation without matching completion identifiers', () => {
+    const config = require('../language-configuration.json');
+    const increase = new RegExp(config.indentationRules.increaseIndentPattern);
+    const decrease = new RegExp(config.indentationRules.decreaseIndentPattern);
+    for (const line of ['典:', '典：', '表 取 典:', '    表 取 典：']) assert.ok(increase.test(line), line);
+    for (const line of ['字典:', '完成:', '典: 成.', "表 取 ‘典:’", '批. 典:', '# 典:']) assert.ok(!increase.test(line),line);
+    for (const line of ['成', '成.', '成。', '    成)']) assert.ok(decrease.test(line),line);
+    for (const line of ['完成', '成果.', '成2.', '完.']) assert.ok(!decrease.test(line),line);
+    assert.ok(!config.brackets.some(([a]) => a==='典'), 'type annotations must not be mistaken for block openers');
+    const rule = config.onEnterRules[0];
+    for (const line of ['典:', '表 取 典:']) assert.ok(new RegExp(rule.beforeText).test(line));
+    for (const line of ['字典:', 'α典:', '𠀀典:']) assert.ok(!new RegExp(rule.beforeText).test(line));
+    assert.ok(new RegExp(rule.afterText).test('成.'));
+    assert.ok(!new RegExp(rule.afterText).test('成果.'));
+    assert.equal(rule.action.indent,'indentOutdent');
+});
+
+test('map grammar nests and never closes on 成 inside 完成, strings, comments or type names', () => {
+    let stack = grammar.tokenizeLine('表 取 典:').ruleStack;
+    for (const line of ["‘完成’ 对 典:", '完成 对 真.', '批. 成', '解. 成 释.', "‘成’ 对 假."]) {
+        const result = grammar.tokenizeLine(line, stack); stack = result.ruleStack;
+        assert.ok(result.tokens.some(t => t.scopes.includes('meta.map.ru')),line);
+    }
+    stack = grammar.tokenizeLine('成.',stack).ruleStack;
+    assert.ok(scopes('完成 对 真.',0,stack).includes('meta.map.ru'));
+    stack = grammar.tokenizeLine('成.',stack).ruleStack;
+    assert.ok(!scopes('显 真.',0,stack).includes('meta.map.ru'));
+    stack = grammar.tokenizeLine('算 查询 表 为 典:').ruleStack;
+    assert.ok(!scopes('显 真.',0,stack).includes('meta.map.ru'));
+});

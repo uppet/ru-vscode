@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.0 — 2026-10-09
+
+- Sync with Ru 0.10.0: independent 事实 type and 真/假 literals, with migration guidance for truthiness and comparisons.
+- Highlight nested 典: … 成 literals with Unicode identifier boundaries, preserving 完成, anonymous functions, comments and type annotations.
+- Add paired map snippets, empty maps, map callbacks, fact parameters, conservative indentation and paired Enter handling.
+- Add lexical fact/map hover documenting ordinary methods, unordered snapshot enumeration and shape-key 同/印 contracts.
+- Preserve all interactive runner, trust/save and optional-parameter behavior; no interpreter bundled or Marketplace publishing.
+
 ## 0.2.2
 
 - 对应 Ru 0.9.0（RU008）：省略及混合参数类型片段、规则悬停与文档。

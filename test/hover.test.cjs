@@ -26,3 +26,14 @@ test('RU008 hover explains optional declaration types without changing call or a
         for (const term of ['0.9.0', '含空', '仍必传', '显式类型仍检查', '空白或逗号', '调用实参混用']) assert.ok(text.includes(term), term);
     }
 });
+test('fact and map hover explains changed semantics and ordinary method contracts', () => {
+    for (const word of ['事实','真','假','典','成']) assert.ok(hoverAt(word,0)?.text.includes('0.10.0'));
+    const facts = hoverAt('事实',0).text;
+    for (const term of ['只有空、假','0、空句、空阵和空典','独立类型','短路']) assert.ok(facts.includes(term));
+    const map = hoverAt('典',0).text;
+    for (const term of ['普通方法名','无序快照','返回事实','安全整数','相同印值']) assert.ok(map.includes(term));
+    for (const word of ['查','增','除','列','同','印']) assert.equal(hoverAt(word,0),undefined);
+    for (const source of ['完成','事实值','字典','真假','𠀀成','# 成','批. 真','解. 假 释.', '‘典’']) {
+        for (let i=0;i<source.length;i++) assert.equal(hoverAt(source,i),undefined,source);
+    }
+});

@@ -51,6 +51,24 @@ exports.run = async () => {
         const optionalHovers = await vscode.commands.executeCommand('vscode.executeHoverProvider', optionalDocument.uri, new vscode.Position(line, 0));
         assert.ok(optionalHovers.some(h => h.contents.some(c => c.value?.includes('0.9.0') && c.value?.includes('含空'))), 'registered RU008 declaration hover');
     }
+    const factsDocument = await vscode.workspace.openTextDocument({ language: 'ru', content: '事实 真 假 典 成\n完成 取 真.\n批. 典 成 假' });
+    for (const column of [0, 3, 5, 7, 9]) {
+        const found = await vscode.commands.executeCommand('vscode.executeHoverProvider', factsDocument.uri, new vscode.Position(0,column));
+        assert.ok(found.some(h => h.contents.some(c => c.value?.includes('0.10.0'))), 'registered fact/map hover');
+    }
+    const completed = await vscode.commands.executeCommand('vscode.executeHoverProvider', factsDocument.uri, new vscode.Position(1,1));
+    assert.ok(!completed.some(h => h.contents.some(c => c.value?.includes('成：'))), '完成 never exposes 成 hover');
+    const mapDocument = await vscode.workspace.openTextDocument({ language: 'ru', content: '表 取 典:成.' });
+    const mapEditor = await vscode.window.showTextDocument(mapDocument);
+    mapEditor.options = { insertSpaces: true, tabSize: 4 };
+    mapEditor.selection = new vscode.Selection(0,6,0,6);
+    await vscode.commands.executeCommand('type', { text: '\n' });
+    assert.equal(mapDocument.getText(), '表 取 典:\n    \n成.', 'paired map Enter indentation');
+    const snippetDocument = await vscode.workspace.openTextDocument({ language: 'ru', content: '' });
+    const snippetEditor = await vscode.window.showTextDocument(snippetDocument);
+    const mapSnippet = require('../snippets/ru.json')['典字面量'];
+    await snippetEditor.insertSnippet(new vscode.SnippetString(mapSnippet.body.join('\n')));
+    assert.equal(snippetDocument.getText(), '典:\n    ‘上’ 对 0.\n    ‘下’ 对 2.\n成');
     await vscode.window.showTextDocument(document);
     const starts = [], ends = [];
     const listeners = [vscode.tasks.onDidStartTaskProcess(e => starts.push(e)), vscode.tasks.onDidEndTaskProcess(e => ends.push(e))];

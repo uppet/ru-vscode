@@ -73,6 +73,40 @@
       ]
     },
     {
+      "match": "(?<![\\p{L}\\p{N}_])(为)(\\s+)(典)(?![\\p{L}\\p{N}_])",
+      "captures": {
+        "1": {
+          "name": "keyword.operator.word.ru"
+        },
+        "3": {
+          "name": "storage.type.ru"
+        }
+      }
+    },
+    {
+      "name": "meta.map.ru",
+      "begin": "(?<![\\p{L}\\p{N}_])(典)(\\s*[:：])",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.control.ru"
+        },
+        "2": {
+          "name": "punctuation.separator.ru"
+        }
+      },
+      "end": "(?<![\\p{L}\\p{N}_])成(?![\\p{L}\\p{N}_])",
+      "endCaptures": {
+        "0": {
+          "name": "keyword.control.ru"
+        }
+      },
+      "patterns": [
+        {
+          "include": "$self"
+        }
+      ]
+    },
+    {
       "match": "(?<![\\p{L}\\p{N}_])(形)\\s+([\\p{L}_][\\p{L}\\p{N}_]*)",
       "captures": {
         "1": {
@@ -100,7 +134,7 @@
     },
     {
       "name": "constant.language.ru",
-      "match": "(?<![\\p{L}\\p{N}_])空(?![\\p{L}\\p{N}_])"
+      "match": "(?<![\\p{L}\\p{N}_])(?:空|真|假)(?![\\p{L}\\p{N}_])"
     },
     {
       "name": "keyword.operator.word.ru",
@@ -108,7 +142,7 @@
     },
     {
       "name": "keyword.control.ru",
-      "match": "(?<![\\p{L}\\p{N}_])(?:显|得|完|破|若|则|另|然|循|次|环|算|作|法|形|象|如|新|外言|尽|试|救|卒)(?![\\p{L}\\p{N}_])"
+      "match": "(?<![\\p{L}\\p{N}_])(?:显|得|完|破|若|则|另|然|循|次|环|算|作|法|形|象|如|新|外言|尽|试|救|卒|成)(?![\\p{L}\\p{N}_])"
     },
     {
       "name": "keyword.control.end.ru",
@@ -129,6 +163,10 @@
     {
       "name": "punctuation.separator.ru",
       "match": "[,.：:。，]"
+    },
+    {
+      "name": "storage.type.ru",
+      "match": "(?<![\\p{L}\\p{N}_])(?:事实|典)(?![\\p{L}\\p{N}_])"
     },
     {
       "name": "variable.other.ru",

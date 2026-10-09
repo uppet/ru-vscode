@@ -15,6 +15,8 @@ try {
         const defaults = {};
         let source = snippet.body.join('\n').replace(/\$\{(\d+):([^}]*)\}/g, (_, key, value) => (defaults[key] = value))
             .replace(/\$\{(\d+)\}/g, (_, key) => defaults[key]).replaceAll('$0', '');
+        if (name === '典字面量' || name === '空典') source = `表 取 ${source.trim()}.\n`;
+        if (name === '典列回调') source = `表 取 典: ‘上’ 对 0. 成.\n${source}`;
         if (name.startsWith('匿名')) source = `回调 取 ${source.trim()}.\n`;
         if (name === '过程提前结束') source = `作 提前结束:\n${source}\n为\n`;
         const file = path.join(temp, `${name}.ru`);
@@ -43,5 +45,32 @@ try {
     const references = cp.spawnSync(plan.executable, plan.args, { cwd: plan.cwd, encoding: 'utf8', timeout: 10000 });
     assert.equal(references.status, 0, references.stderr || String(references.error));
     assert.equal(references.stdout, '1\n好\n');
-    console.log('PASS: eighteen snippets checked by actual Ru; Unicode/space/metacharacter paths, argv, stdin, and explicit/natural procedure completion through real interpreter.');
+    fs.writeFileSync(file, `表 取 典: ‘上’ 对 0. ‘下’ 对 2. 成.
+显 表 其 查 ‘上’.
+显 表 其 除 ‘下’.
+显 表 其 除 ‘下’.
+表 其 增 ‘左’ 3.
+显 表 其 量.
+表 其 列 作 键, 值:
+    显 值.
+    表 其 除 键.
+为.
+显 表 其 量.
+显 0 为 事实.
+显 '' 为 事实.
+显 [] 为 事实.
+显 (典: 成) 为 事实.
+显 空 为 事实.
+显 假 为 事实.
+显 1 == 1.
+算 确认 值 为 事实: 得 值. 法
+显 确认 真.
+`);
+    const maps = cp.spawnSync(plan.executable, plan.args, { cwd: plan.cwd, encoding: 'utf8', timeout: 10000 });
+    assert.equal(maps.status, 0, maps.stderr || String(maps.error));
+    const lines = maps.stdout.trim().split('\n');
+    assert.deepEqual(lines.slice(0,4), ['0','真','假','2']);
+    assert.deepEqual(lines.slice(4,6).sort(), ['0','3']); // snapshot iteration order is unspecified
+    assert.deepEqual(lines.slice(6), ['0','真','真','真','真','假','假','真','真']);
+    console.log('PASS: all snippets checked by actual Ru; Unicode/space/metacharacter paths, argv, stdin, and explicit/natural procedure completion through real interpreter.');
 } finally { fs.rmSync(temp, { recursive: true, force: true }); }
