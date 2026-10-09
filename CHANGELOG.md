@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.2
+
+- 对应 Ru 0.9.0（RU008）：省略及混合参数类型片段、规则悬停与文档。
+- 修正省略类型的声明名高亮，避免把表达式中的匿名参数误标为函数名。
+- 保留显式类型片段、中文注释、完及运行行为；不发布 Marketplace。
+
 ## 0.2.1
 
 - Add Ru 0.8.0 procedure exit statement 完. / 完。 highlighting, snippet and lexical hover help.

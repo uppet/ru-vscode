@@ -93,3 +93,15 @@ test('完 is a whole statement keyword, never a block delimiter', () => {
     const snippet = require('../snippets/ru.json')['过程提前结束'];
     assert.deepEqual(snippet.body, ['完.', '$0']);
 });
+test('RU008 optional and mixed declaration parameters keep names distinct from anonymous parameters', () => {
+    for (const header of ['算 原样 值:', '作 原样 值:', '    算 原样 值, 次数 为 数:', '算 原样 值 次数 为 数：', '算 原样 值 为 数, 次数:', '算 原样 值，次数 为 数:']) {
+        has(header, '原样', 'entity.name.function.ru');
+        has(header, '值', 'variable.other.ru');
+    }
+    for (const source of ['回调 取 算 值: 得 值. 法.', '回调 取 作 值: 显 值. 为.', '回调 取 算 值 次数 为 数: 得 值. 法.', '显 (算 值: 得 值. 法) 空.', '回调 取 算 值 为 数: 得 值. 法.']) {
+        has(source, '值', 'variable.other.ru');
+        assert.ok(!scopes(source, source.indexOf('值')).includes('entity.name.function.ru'));
+    }
+    const increase = new RegExp(require('../language-configuration.json').indentationRules.increaseIndentPattern);
+    for (const line of ['算 原样 值:', '作 原样 值:', '回调 取 算 值:', '回调 取 作 值:', '算 选择 值, 次数 为 数:']) assert.ok(increase.test(line), line);
+});

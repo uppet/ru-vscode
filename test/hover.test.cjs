@@ -20,3 +20,9 @@ test('procedure finish help states version, result and scope without semantic cl
         assert.equal(hoverAt(source, source.indexOf('完')), undefined, source);
     }
 });
+test('RU008 hover explains optional declaration types without changing call or arity rules', () => {
+    for (const word of ['算', '作']) {
+        const text = hoverAt(word, 0).text;
+        for (const term of ['0.9.0', '含空', '仍必传', '显式类型仍检查', '空白或逗号', '调用实参混用']) assert.ok(text.includes(term), term);
+    }
+});

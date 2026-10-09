@@ -46,6 +46,11 @@ exports.run = async () => {
         const hidden = await vscode.commands.executeCommand('vscode.executeHoverProvider', finishDocument.uri, position);
         assert.ok(!hidden.some(h => h.contents.some(c => c.value?.includes('完：'))), 'no finish hover in comments or larger identifiers');
     }
+    const optionalDocument = await vscode.workspace.openTextDocument({ language: 'ru', content: '算 原样 值:\n    得 值.\n法\n作 显示 值:\n    显 值.\n为' });
+    for (const line of [0, 3]) {
+        const optionalHovers = await vscode.commands.executeCommand('vscode.executeHoverProvider', optionalDocument.uri, new vscode.Position(line, 0));
+        assert.ok(optionalHovers.some(h => h.contents.some(c => c.value?.includes('0.9.0') && c.value?.includes('含空'))), 'registered RU008 declaration hover');
+    }
     await vscode.window.showTextDocument(document);
     const starts = [], ends = [];
     const listeners = [vscode.tasks.onDidStartTaskProcess(e => starts.push(e)), vscode.tasks.onDidEndTaskProcess(e => ends.push(e))];

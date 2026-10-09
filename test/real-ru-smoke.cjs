@@ -35,5 +35,9 @@ try {
         assert.equal(finish.status, 0, finish.stderr || String(finish.error));
         assert.equal(finish.stdout, '空\n空\n');
     }
-    console.log('PASS: thirteen snippets checked by actual Ru; Unicode/space/metacharacter paths, argv, stdin, and explicit/natural procedure completion through real interpreter.');
+    fs.writeFileSync(file, '算 原样 值:\n    得 值.\n法\n算 选择 值, 次数 为 数:\n    得 值.\n法\n回调 取 算 值: 得 值. 法.\n过程 取 作 值: 完. 为.\n显 原样 空.\n显 选择 空 2.\n显 回调 空.\n显 过程 空.\n');
+    const optional = cp.spawnSync(plan.executable, plan.args, { cwd: plan.cwd, encoding: 'utf8', timeout: 10000 });
+    assert.equal(optional.status, 0, optional.stderr || String(optional.error));
+    assert.equal(optional.stdout, '空\n空\n空\n空\n');
+    console.log('PASS: eighteen snippets checked by actual Ru; Unicode/space/metacharacter paths, argv, stdin, and explicit/natural procedure completion through real interpreter.');
 } finally { fs.rmSync(temp, { recursive: true, force: true }); }
