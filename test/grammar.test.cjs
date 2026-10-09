@@ -183,3 +183,39 @@ test('symbol delimiters pair conservatively without changing word blocks', () =>
     }
     assert.ok(inc.test('若 真 则')); assert.ok(dec.test('然'));
 });
+test('scoped word blocks preserve contextual names and nested lexical states', () => {
+    for (const id of ['段落','落叶','段2','α段','𠀀落']) has(id,id,'variable.other.ru');
+    for (const line of ['列 其 段 始:0 终:2.', '段 取 1.', '落 取 2.']) {
+        for (const token of grammar.tokenizeLine(line).tokens) assert.ok(!token.scopes.includes('meta.scope.ru'),line);
+    }
+    let stack = grammar.tokenizeLine('段:').ruleStack;
+    assert.ok(scopes('值 取 1.',0,stack).includes('meta.scope.ru'));
+    for (const line of ["显 '落.'.", '批. 落.', '解. 落. 释.', '落叶 取 1.', '落 取 2.', '列 其 落.']) {
+        stack = grammar.tokenizeLine(line,stack).ruleStack;
+        assert.ok(scopes('显 值.',0,stack).includes('meta.scope.ru'),line);
+    }
+    stack = grammar.tokenizeLine('段：',stack).ruleStack;
+    stack = grammar.tokenizeLine('落。',stack).ruleStack;
+    assert.ok(scopes('显 值.',0,stack).includes('meta.scope.ru'));
+    stack = grammar.tokenizeLine('落.',stack).ruleStack;
+    assert.ok(!scopes('显 值.',0,stack).includes('meta.scope.ru'));
+    has('段:', '段', 'keyword.control.ru');
+    has('列 其 段 始:0.', '段', 'variable.other.ru');
+});
+test('scoped indentation and snippet boundaries are conservative', () => {
+    const c=require('../language-configuration.json');
+    const inc=new RegExp(c.indentationRules.increaseIndentPattern),dec=new RegExp(c.indentationRules.decreaseIndentPattern);
+    for(const line of ['段:', ' 段：', '段: 批. 内容', '{', '｛']) assert.ok(inc.test(line),line);
+    for(const line of ['段落:', '其 段:', '段 取 1.', '落 取 2.', '落叶.', '批. 段:']) assert.ok(!inc.test(line)&&!dec.test(line),line);
+    for(const line of ['落.', ' 落。', '}','｝']) assert.ok(dec.test(line),line);
+    const rule=c.onEnterRules.find(r=>r.beforeText.includes('段'));
+    assert.ok(new RegExp(rule.beforeText).test('段:'));
+    assert.ok(new RegExp(rule.afterText).test('落.'));
+    assert.ok(!new RegExp(rule.afterText).test('落叶.'));
+    assert.equal(require('../snippets/ru.json')['作用域段'].body.at(-2),'落.');
+});
+test('assignment aliases stay distinct from map fields, named arguments and block colons', () => {
+    for(const op of [':=','：=']) has(`值 ${op} 1.`,op,'keyword.operator.assignment.ru');
+    for(const line of ["表 取 {'心': 0}.", '函数 名:1.', '段:', '值 : = 1.']) assert.ok(!grammar.tokenizeLine(line).tokens.some(t=>t.scopes.includes('keyword.operator.assignment.ru')),line);
+    for(const line of ['# :=','批. ：=','解. := 释.', '“:=”']) assert.ok(!grammar.tokenizeLine(line).tokens.some(t=>t.scopes.includes('keyword.operator.assignment.ru')),line);
+});

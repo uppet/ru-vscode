@@ -37,3 +37,17 @@ test('fact and map hover explains changed semantics and ordinary method contract
         for (let i=0;i<source.length;i++) assert.equal(hoverAt(source,i),undefined,source);
     }
 });
+test('scope hover describes local writes and excludes member names and ordinary bindings', () => {
+    const text=hoverAt('段:',0).text;
+    for(const phrase of ['直接取只写当前块','闭包','得、完、破','表达式位置']) assert.ok(text.includes(phrase),phrase);
+    assert.ok(hoverAt('落.',0).text.includes('上下文'));
+    assert.ok(hoverAt('值 取 1.',2).text.includes('块正文的直接取只写本层'));
+    for(const source of ['其 段 始:0.', '其 段:0.', '其 落.', '段 取 1.', '落 取 1.', '段落:', '落叶.', '# 段:', '批. 落.', '“段:”']) {
+        const i=Math.max(source.indexOf('段'),source.indexOf('落'));
+        assert.equal(hoverAt(source,i),undefined,source);
+    }
+});
+test('assignment aliases expose assignment rules only outside strings and comments', () => {
+    for(const op of [':=','：=']) for(const pos of [2,3]) assert.ok(hoverAt(`值 ${op} 1.`,pos)?.text.includes('只写本层'));
+    for(const text of ["' :='",'批. :=','解. ：= 释.','# :=','值 : = 1.']) assert.equal(hoverAt(text,text.indexOf(':')<0?text.indexOf('：'):text.indexOf(':')),undefined,text);
+});

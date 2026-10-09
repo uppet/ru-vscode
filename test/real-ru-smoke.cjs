@@ -76,5 +76,28 @@ try {
     const symbols = cp.spawnSync(plan.executable, plan.args, { cwd: plan.cwd, encoding: 'utf8', timeout: 10000 });
     assert.equal(symbols.status, 0, symbols.stderr || String(symbols.error));
     assert.equal(symbols.stdout, '1\n0\n');
+    fs.writeFileSync(file, `值 取 1.
+段:
+    值 := 2.
+    显 值.
+    段:
+        值 ：= 3.
+        显 值.
+    落.
+    显 值.
+落.
+显 值.
+{
+    值 := 4.
+    显 值.
+}
+显 值.
+表 := {'心': 0}.
+表 其 增 '意' 1.
+显 表 其 查 '意'.
+`);
+    const scopes = cp.spawnSync(plan.executable, plan.args, { cwd: plan.cwd, encoding: 'utf8', timeout: 10000 });
+    assert.equal(scopes.status, 0, scopes.stderr || String(scopes.error));
+    assert.equal(scopes.stdout, '2\n3\n2\n1\n4\n1\n1\n');
     console.log('PASS: all snippets checked by actual Ru; Unicode/space/metacharacter paths, argv, stdin, and explicit/natural procedure completion through real interpreter.');
 } finally { fs.rmSync(temp, { recursive: true, force: true }); }

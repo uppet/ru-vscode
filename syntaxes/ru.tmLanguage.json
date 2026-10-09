@@ -73,6 +73,17 @@
       ]
     },
     {
+      "match": "(?<![\\p{L}\\p{N}_])(其)(\\s+)(段|落)(?![\\p{L}\\p{N}_])",
+      "captures": {
+        "1": {
+          "name": "keyword.operator.word.ru"
+        },
+        "3": {
+          "name": "variable.other.ru"
+        }
+      }
+    },
+    {
       "match": "(?<![\\p{L}\\p{N}_])(为)(\\s+)(典)(?![\\p{L}\\p{N}_])",
       "captures": {
         "1": {
@@ -82,6 +93,29 @@
           "name": "storage.type.ru"
         }
       }
+    },
+    {
+      "name": "meta.scope.ru",
+      "begin": "(?:^\\s*|(?<=[.。{}｛｝])\\s*)(段)(\\s*[:：])",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.control.ru"
+        },
+        "2": {
+          "name": "punctuation.separator.ru"
+        }
+      },
+      "end": "(?<![\\p{L}\\p{N}_])落(?=\\s*[.。])",
+      "endCaptures": {
+        "0": {
+          "name": "keyword.control.ru"
+        }
+      },
+      "patterns": [
+        {
+          "include": "$self"
+        }
+      ]
     },
     {
       "name": "meta.map.ru",
@@ -171,6 +205,10 @@
     {
       "name": "support.function.builtin.ru",
       "match": "(?<![\\p{L}\\p{N}_])(?:读|件|录|件作成果|读取|显出|错误|__竞赛)(?![\\p{L}\\p{N}_])"
+    },
+    {
+      "name": "keyword.operator.assignment.ru",
+      "match": "[:：]="
     },
     {
       "name": "keyword.operator.ru",

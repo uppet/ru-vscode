@@ -84,6 +84,28 @@ exports.run = async () => {
     symbolEditor.options = { insertSpaces: true, tabSize: 4 };
     await symbolEditor.insertSnippet(new vscode.SnippetString(require('../snippets/ru.json')['符号典'].body.join('\n')));
     assert.equal(symbolDoc.getText(), "{\n    '心': 0,\n    '意': 1\n}", 'symbol snippet');
+    const scopeDoc = await vscode.workspace.openTextDocument({ language: 'ru', content: '段:落.' });
+    const scopeEditor = await vscode.window.showTextDocument(scopeDoc);
+    scopeEditor.options = { insertSpaces: true, tabSize: 4 };
+    scopeEditor.selection = new vscode.Selection(0,2,0,2);
+    await vscode.commands.executeCommand('type', { text: '\n' });
+    assert.equal(scopeDoc.getText(), '段:\n    \n落.', 'scope paired Enter');
+    const scopeHovers = await vscode.commands.executeCommand('vscode.executeHoverProvider', scopeDoc.uri, new vscode.Position(0,0));
+    assert.ok(scopeHovers.some(h=>h.contents.some(c=>c.value?.includes('直接取只写当前块'))), 'scope hover registered');
+    for (const [name, expected] of [['作用域段','段:\n    值 取 1.\n    显 值.\n落.\n'], ['符号作用域块','{\n    值 取 1.\n    显 值.\n}\n'], ['符号赋值','值 := 1.\n']]) {
+        const doc = await vscode.workspace.openTextDocument({language:'ru',content:''});
+        const ed = await vscode.window.showTextDocument(doc);
+        ed.options = {insertSpaces:true,tabSize:4};
+        await ed.insertSnippet(new vscode.SnippetString(require('../snippets/ru.json')[name].body.join('\n')));
+        assert.equal(doc.getText(),expected,name);
+    }
+    const aliasDoc = await vscode.workspace.openTextDocument({language:'ru',content:'值 := 1.\n其 段 始:0.\n批. 段:'});
+    const aliasHovers = await vscode.commands.executeCommand('vscode.executeHoverProvider',aliasDoc.uri,new vscode.Position(0,2));
+    assert.ok(aliasHovers.some(h=>h.contents.some(c=>c.value?.includes('不是赋值表达式'))), 'alias hover registered');
+    for(const pos of [new vscode.Position(1,2),new vscode.Position(2,3)]) {
+        const hidden = await vscode.commands.executeCommand('vscode.executeHoverProvider',aliasDoc.uri,pos);
+        assert.ok(!hidden.some(h=>h.contents.some(c=>c.value?.includes('段：'))),'no member/comment scope hover');
+    }
     await vscode.window.showTextDocument(document);
     const starts = [], ends = [];
     const listeners = [vscode.tasks.onDidStartTaskProcess(e => starts.push(e)), vscode.tasks.onDidEndTaskProcess(e => ends.push(e))];

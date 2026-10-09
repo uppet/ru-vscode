@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.0 — 2026-10-09
+
+- Add scoped 段: … 落. highlighting, paired indentation, snippets and lexical help.
+- Support statement-position braces alongside expression-position dictionaries.
+- Explain block-local direct assignment and preserve member 段, longer names, strings and comments.
+- Add := / ：= assignment alias highlighting, snippets and hover without changing colon syntax.
+- Extend TextMate, hover, real interpreter and VS Code host regressions.
+
 ## 0.3.1 — 2026-10-09
 
 - Add brace-delimited dictionary highlighting, pairing, paired Enter indentation and two snippets.
