@@ -107,6 +107,26 @@
       ]
     },
     {
+      "name": "meta.braces.ru",
+      "begin": "[{｛]",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.section.brackets.ru"
+        }
+      },
+      "end": "[}｝]",
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.section.brackets.ru"
+        }
+      },
+      "patterns": [
+        {
+          "include": "$self"
+        }
+      ]
+    },
+    {
       "match": "(?<![\\p{L}\\p{N}_])(形)\\s+([\\p{L}_][\\p{L}\\p{N}_]*)",
       "captures": {
         "1": {

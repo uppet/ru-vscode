@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.1 — 2026-10-09
+
+- Add brace-delimited dictionary highlighting, pairing, paired Enter indentation and two snippets.
+- Preserve 典/成, nested anonymous functions, strings, comments and existing statement blocks.
+- Extend real TextMate, VS Code host and actual Ru snippet/runtime regression coverage.
+
 ## 0.3.0 — 2026-10-09
 
 - Sync with Ru 0.10.0: independent 事实 type and 真/假 literals, with migration guidance for truthiness and comparisons.

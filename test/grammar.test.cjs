@@ -151,3 +151,35 @@ test('map grammar nests and never closes on 成 inside 完成, strings, comments
     stack = grammar.tokenizeLine('算 查询 表 为 典:').ruleStack;
     assert.ok(!scopes('显 真.',0,stack).includes('meta.map.ru'));
 });
+
+test('symbol dictionaries nest with word dictionaries and preserve strings, comments and closures', () => {
+    for (const line of ["表 取 {'心': 0, '意': 1}.", '表 取 ｛‘心’：0，‘意’：1，｝.']) {
+        has(line, line.includes('{') ? '{' : '｛', 'punctuation.section.brackets.ru');
+        has(line, '0', 'constant.numeric.ru');
+        has(line, line.includes('}') ? '}' : '｝', 'punctuation.section.brackets.ru');
+    }
+    let stack = grammar.tokenizeLine("表 取 {'外': 典:").ruleStack;
+    stack = grammar.tokenizeLine("'内' 对 {'闭包': 算 值: 得 值. 法, '成': '}' }.", stack).ruleStack;
+    stack = grammar.tokenizeLine('批. } 成', stack).ruleStack;
+    assert.ok(scopes('完成',0,stack).includes('meta.map.ru'));
+    stack = grammar.tokenizeLine('成}',stack).ruleStack;
+    assert.ok(!scopes('显 真.',0,stack).some(s => ['meta.braces.ru','meta.map.ru'].includes(s)));
+    for (const line of ["'{成}'", '‘｛成｝’', '# {成}', '批. ｛成｝', '解. {成} 释.']) {
+        assert.ok(!grammar.tokenizeLine(line).tokens.some(t => t.scopes.includes('meta.braces.ru')),line);
+    }
+});
+test('symbol delimiters pair conservatively without changing word blocks', () => {
+    const c = require('../language-configuration.json');
+    const inc = new RegExp(c.indentationRules.increaseIndentPattern);
+    const dec = new RegExp(c.indentationRules.decreaseIndentPattern);
+    for (const [a,z] of [['{','}'], ['｛','｝']]) {
+        assert.ok(c.brackets.some(p => p[0]===a && p[1]===z));
+        assert.ok(c.surroundingPairs.some(p => p[0]===a && p[1]===z));
+        assert.deepEqual(c.autoClosingPairs.find(p => p.open===a), {open:a,close:z,notIn:['string','comment']});
+        assert.ok(inc.test(`表 取 ${a}`));
+        assert.ok(dec.test(`    ${z}.`));
+        assert.ok(!inc.test(`表 取 ${a}${z}.`));
+        for (const line of [`# ${a}`, `批. ${a}`, `'${a}'`]) assert.ok(!inc.test(line),line);
+    }
+    assert.ok(inc.test('若 真 则')); assert.ok(dec.test('然'));
+});

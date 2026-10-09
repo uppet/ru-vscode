@@ -69,6 +69,21 @@ exports.run = async () => {
     const mapSnippet = require('../snippets/ru.json')['典字面量'];
     await snippetEditor.insertSnippet(new vscode.SnippetString(mapSnippet.body.join('\n')));
     assert.equal(snippetDocument.getText(), '典:\n    ‘上’ 对 0.\n    ‘下’ 对 2.\n成');
+    for (const [open, close] of [['{','}'], ['｛','｝']]) {
+        const doc = await vscode.workspace.openTextDocument({ language: 'ru', content: '表 取 ' });
+        const ed = await vscode.window.showTextDocument(doc);
+        ed.options = { insertSpaces: true, tabSize: 4 };
+        ed.selection = new vscode.Selection(0,4,0,4);
+        await vscode.commands.executeCommand('type', { text: open });
+        assert.equal(doc.getText(), `表 取 ${open}${close}`, 'symbol auto closing');
+        await vscode.commands.executeCommand('type', { text: '\n' });
+        assert.equal(doc.getText(), `表 取 ${open}\n    \n${close}`, 'symbol paired Enter');
+    }
+    const symbolDoc = await vscode.workspace.openTextDocument({ language: 'ru', content: '' });
+    const symbolEditor = await vscode.window.showTextDocument(symbolDoc);
+    symbolEditor.options = { insertSpaces: true, tabSize: 4 };
+    await symbolEditor.insertSnippet(new vscode.SnippetString(require('../snippets/ru.json')['符号典'].body.join('\n')));
+    assert.equal(symbolDoc.getText(), "{\n    '心': 0,\n    '意': 1\n}", 'symbol snippet');
     await vscode.window.showTextDocument(document);
     const starts = [], ends = [];
     const listeners = [vscode.tasks.onDidStartTaskProcess(e => starts.push(e)), vscode.tasks.onDidEndTaskProcess(e => ends.push(e))];

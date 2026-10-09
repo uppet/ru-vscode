@@ -15,7 +15,7 @@ try {
         const defaults = {};
         let source = snippet.body.join('\n').replace(/\$\{(\d+):([^}]*)\}/g, (_, key, value) => (defaults[key] = value))
             .replace(/\$\{(\d+)\}/g, (_, key) => defaults[key]).replaceAll('$0', '');
-        if (name === '典字面量' || name === '空典') source = `表 取 ${source.trim()}.\n`;
+        if (name === '典字面量' || name === '空典' || name === '符号典' || name === '符号空典') source = `表 取 ${source.trim()}.\n`;
         if (name === '典列回调') source = `表 取 典: ‘上’ 对 0. 成.\n${source}`;
         if (name.startsWith('匿名')) source = `回调 取 ${source.trim()}.\n`;
         if (name === '过程提前结束') source = `作 提前结束:\n${source}\n为\n`;
@@ -72,5 +72,9 @@ try {
     assert.deepEqual(lines.slice(0,4), ['0','真','假','2']);
     assert.deepEqual(lines.slice(4,6).sort(), ['0','3']); // snapshot iteration order is unspecified
     assert.deepEqual(lines.slice(6), ['0','真','真','真','真','假','假','真','真']);
+    fs.writeFileSync(file, "表 取 {'心': 0, '意': 1}.\n显 表 其 查 '意'.\n显 {} 其 量.\n");
+    const symbols = cp.spawnSync(plan.executable, plan.args, { cwd: plan.cwd, encoding: 'utf8', timeout: 10000 });
+    assert.equal(symbols.status, 0, symbols.stderr || String(symbols.error));
+    assert.equal(symbols.stdout, '1\n0\n');
     console.log('PASS: all snippets checked by actual Ru; Unicode/space/metacharacter paths, argv, stdin, and explicit/natural procedure completion through real interpreter.');
 } finally { fs.rmSync(temp, { recursive: true, force: true }); }
