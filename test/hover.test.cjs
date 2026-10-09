@@ -51,3 +51,16 @@ test('assignment aliases expose assignment rules only outside strings and commen
     for(const op of [':=','：=']) for(const pos of [2,3]) assert.ok(hoverAt(`值 ${op} 1.`,pos)?.text.includes('只写本层'));
     for(const text of ["' :='",'批. :=','解. ：= 释.','# :=','值 : = 1.']) assert.equal(hoverAt(text,text.indexOf(':')<0?text.indexOf('：'):text.indexOf(':')),undefined,text);
 });
+test('practical member hover is contextual and distinguishes array from dictionary lookup', () => {
+    for (const word of ['删','弹','查']) {
+        for (const gap of [' ', '\t', '\n']) {
+            const source = `列 其${gap}${word}.`;
+            assert.ok(hoverAt(source, source.indexOf(word))?.text.includes('0.12.0'));
+        }
+        for (const source of [word, `${word} 取 1.`, `其他 ${word}.`, `𠀀其 ${word}.`, `其 ${word}值.`, `其 2 ${word}.`, `其 '${word}'.`, `# 其 ${word}`, `解. 其 ${word} 释.`, `# 其\n${word}.`, `其 '文字' ${word}.`]) assert.equal(hoverAt(source,source.lastIndexOf(word)),undefined,source);
+    }
+    const lookup=hoverAt('列 其 查 值:1.',4).text;
+    for (const text of ['零起点位置','浅元素快照','键:目标','不判断接收者类型']) assert.ok(lookup.includes(text));
+    assert.ok(hoverAt('列 其 弹.',4).text.includes('不写()'));
+    for (const word of ['拆分','替换','去空白','定点','平方根','幂','取整','向下取整','向上取整','四舍五入','造源','整数','洗牌']) assert.equal(hoverAt(`模块 其 ${word}.`,5),undefined,word);
+});

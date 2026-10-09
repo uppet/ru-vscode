@@ -23,6 +23,24 @@ try {
         fs.writeFileSync(file, source);
         const result = cp.spawnSync(interpreterPath, [cli, 'check', file], { encoding: 'utf8', timeout: 10000 });
         assert.equal(result.status, 0, `${name}: ${result.stderr || result.error}`);
+        const expectedPractical = {
+            '文本整理': '[小明, 小红]\n你好\n梨\n3.50\n',
+            '数学计算': '9\n32\n-1\n-2\n-1\n-2\n',
+            '阵删弹查': '1\n车\n船\n空\n'
+        };
+        if (name in expectedPractical || name === '随机种子') {
+            const run = cp.spawnSync(interpreterPath, [cli, 'run', file], { encoding: 'utf8', timeout: 10000 });
+            assert.equal(run.status, 0, `${name}: ${run.stderr || run.error}`);
+            if (name in expectedPractical) assert.equal(run.stdout, expectedPractical[name], name);
+            else {
+                const lines=run.stdout.trim().split('\n');
+                assert.match(lines[0], /^[1-6]$/);
+                assert.equal(lines[1], '[甲, 乙, 丙, 丁]');
+                assert.deepEqual(lines[2].slice(1,-1).split(', ').sort(), ['甲','乙','丙','丁'].sort());
+                const repeat=cp.spawnSync(interpreterPath, [cli, 'run', file], {encoding:'utf8',timeout:10000});
+                assert.equal(repeat.status,0,repeat.stderr); assert.equal(repeat.stdout,run.stdout);
+            }
+        }
     }
     const file = path.join(temp, '你好 空 格;$(no shell).ru');
     fs.writeFileSync(file, '算 元初 外参 为 句 阵:\n    显 外参.\n    显 读.\n    得 0.\n法\n');

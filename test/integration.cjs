@@ -106,6 +106,22 @@ exports.run = async () => {
         const hidden = await vscode.commands.executeCommand('vscode.executeHoverProvider',aliasDoc.uri,pos);
         assert.ok(!hidden.some(h=>h.contents.some(c=>c.value?.includes('段：'))),'no member/comment scope hover');
     }
+    const practicalDoc = await vscode.workspace.openTextDocument({language:'ru',content:'列 其 删 位:1.\n列 其 弹.\n列 其 查 值:1.\n删 取 1.\n批. 其 弹.'});
+    for (const line of [0,1,2]) {
+        const found=await vscode.commands.executeCommand('vscode.executeHoverProvider',practicalDoc.uri,new vscode.Position(line,4));
+        assert.ok(found.some(h=>h.contents.some(c=>c.value?.includes('0.12.0'))),'practical member hover');
+    }
+    for (const [line,col] of [[3,0],[4,6]]) {
+        const hidden=await vscode.commands.executeCommand('vscode.executeHoverProvider',practicalDoc.uri,new vscode.Position(line,col));
+        assert.equal(hidden.length,0,'ordinary name/comment has no practical hover');
+    }
+    for (const name of ['文本整理','数学计算','随机种子','阵删弹查']) {
+        const doc=await vscode.workspace.openTextDocument({language:'ru',content:''});
+        const ed=await vscode.window.showTextDocument(doc);
+        const body=require('../snippets/ru.json')[name].body.join('\n');
+        await ed.insertSnippet(new vscode.SnippetString(body));
+        assert.equal(doc.getText(),body.replace('$0',''),name);
+    }
     await vscode.window.showTextDocument(document);
     const starts = [], ends = [];
     const listeners = [vscode.tasks.onDidStartTaskProcess(e => starts.push(e)), vscode.tasks.onDidEndTaskProcess(e => ends.push(e))];

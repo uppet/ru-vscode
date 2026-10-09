@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.1 — 2026-10-09
+
+- Sync Ru 0.12 practical text, math, random and array libraries.
+- Add contextual 删/弹/查 member highlighting and lexical hover without reserving ordinary names.
+- Add executable module and array snippets; clarify bare 弹 and receiver-dependent 查.
+- Correct README compatibility version and extend real Ru / VS Code host regressions.
+
 ## 0.4.0 — 2026-10-09
 
 - Add scoped 段: … 落. highlighting, paired indentation, snippets and lexical help.

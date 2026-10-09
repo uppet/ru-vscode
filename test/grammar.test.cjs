@@ -111,7 +111,7 @@ test('facts and map delimiters use whole identifiers and preserve comments and n
     has('算 查询 表 为 典:', '典', 'storage.type.ru');
     for (const word of ['典', '成']) has('表 取 典: ‘上’ 对 0. 成.', word, 'keyword.control.ru');
     for (const id of ['字典', '完成', '典藏', '成2', 'α成', '𠀀成', '事实值', '真假', '真实', '假²']) has(id, id, 'variable.other.ru');
-    for (const word of ['查', '增', '除', '列', '同', '印']) has(`表 其 ${word}.`, word, 'variable.other.ru');
+    for (const word of ['增', '除', '列', '同', '印']) has(`表 其 ${word}.`, word, 'variable.other.ru');
     has('表 取 典: ‘成’ 对 算 值: 得 值. 法. 成.', '值', 'variable.other.ru');
     has('表 取 典: ‘成’ 对 作 值: 完. 为. 成.', '完', 'keyword.control.ru');
     for (const line of ['# 典 成 真 假 事实', '批. 典 成 真 假 事实', '解. 典 成 真 假 事实 释.']) {
@@ -218,4 +218,15 @@ test('assignment aliases stay distinct from map fields, named arguments and bloc
     for(const op of [':=','：=']) has(`值 ${op} 1.`,op,'keyword.operator.assignment.ru');
     for(const line of ["表 取 {'心': 0}.", '函数 名:1.', '段:', '值 : = 1.']) assert.ok(!grammar.tokenizeLine(line).tokens.some(t=>t.scopes.includes('keyword.operator.assignment.ru')),line);
     for(const line of ['# :=','批. ：=','解. := 释.', '“:=”']) assert.ok(!grammar.tokenizeLine(line).tokens.some(t=>t.scopes.includes('keyword.operator.assignment.ru')),line);
+});
+test('practical members have contextual coloring, ordinary exports never become keywords', () => {
+    for (const word of ['删','弹','查']) {
+        has(`列 其 ${word}.`,word,'support.function.member.ru');
+        for (const text of [word, `${word} 取 1.`, `其他 ${word}.`, `其 ${word}值.`, `𠀀其 ${word}.`]) has(text,word,'variable.other.ru');
+        for (const line of [`# 其 ${word}.`, `批. 其 ${word}.`, `解. 其 ${word}. 释.`, `'其 ${word}.'`]) assert.ok(!scopes(line,line.indexOf(word)).includes('support.function.member.ru'));
+    }
+    for (const word of ['拆分','替换','去空白','定点','平方根','幂','取整','向下取整','向上取整','四舍五入','造源','整数','洗牌']) {
+        has(`${word} 取 1.`,word,'variable.other.ru');
+        has(`模块 其 ${word}.`,word,'variable.other.ru');
+    }
 });

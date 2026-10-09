@@ -15,16 +15,24 @@ const help: Record<string, string> = {
     '落': '落：结束段作用域块\n\n段: … 落. 的结束标记，需句点（或中文句号）。落在其他上下文仍可作普通名称；不是全局保留字。',
     '形': '形：声明类型名\n\n形名用于类型标注、如继承与新构造，不是可赋值、传参或返回的普通值。'
 };
+const memberHelp: Record<string, string> = {
+    '删': '删：阵成员（Ru 0.12.0+）\n\n阵 其 删 位:1. 原地删除指定位置并返回原元素，其后项左移；位须为合法非负整数。越界和错误参数为普通运行错误，不能由救捕获。别名共享修改，移出空元素也正常返回空。\n\n仅按其后的普通成员名提示，不判断接收者类型；同名自定义成员可能不同。',
+    '弹': '弹：阵成员（Ru 0.12.0+）\n\n阵 其 弹. 无参数，裸成员访问即可调用，不写()。原地移出末项并返回原元素；空阵报普通运行错误，不能由救捕获，安全使用先看量。别名共享修改，移出空元素也正常返回空。\n\n仅按其后的普通成员名提示，不判断接收者类型；同名自定义成员可能不同。',
+    '查': '查：普通成员名\n\n阵（Ru 0.12.0+）：阵 其 查 值:目标. 返回第一个相等项的零起点位置，未找到返回空，不修改阵。按开始时的浅元素快照从左到右使用既有相等协议比较；比较若修改原阵，返回位置仍是快照位置。\n\n典（Ru 0.10.0+）：典 其 查 键:目标. 按键返回值，未找到返回空。\n\n仅按其后的名称提示，不判断接收者类型；同名自定义成员可能不同。'
+};
 export function hoverAt(source: string, offset: number): { start: number; end: number; text: string } | undefined {
     let i = 0;
+    let previousWord = "", previousEnd = 0;
     const char = () => String.fromCodePoint(source.codePointAt(i)!);
     const boundary = () => !/[\p{L}\p{N}_]$/u.test(source.slice(Math.max(0, i - 2), i));
     const marker = (word: string) => source[i] === word && /[.。]/.test(source[i + 1] ?? '');
     while (i < source.length) {
         if (source[i] === '#' || source.startsWith('//', i) || (boundary() && marker('批'))) {
+            previousWord = '';
             const end = source.indexOf('\n', i); i = end < 0 ? source.length : end + 1; continue;
         }
         if (boundary() && marker('解')) {
+            previousWord = '';
             i += 2;
             while (i < source.length) {
                 if (marker('释')) { i += 2; break; }
@@ -34,6 +42,7 @@ export function hoverAt(source: string, offset: number): { start: number; end: n
         }
         const closer: Record<string, string> = { "'": "'", '"': '"', '‘': '’', '“': '”' };
         if (closer[source[i]]) {
+            previousWord = '';
             const end = closer[source[i++]];
             while (i < source.length) {
                 if (source[i] === '\\') { i += 2; continue; }
@@ -53,6 +62,8 @@ export function hoverAt(source: string, offset: number): { start: number; end: n
             while (i < source.length && part.test(char())) { i += char().length; }
             const word = source.slice(begin, i);
             let text = help[word];
+            if (previousWord === '其' && /^\s+$/u.test(source.slice(previousEnd, begin))) { text = memberHelp[word] || text; }
+            previousWord = eligible ? word : ''; previousEnd = i;
             if (word === '段' && (!/^\s*[:：]/u.test(source.slice(i)) || /其\s*$/u.test(source.slice(0, begin)))) { text = ''; }
             if (word === '落' && (!/^\s*[.。]/u.test(source.slice(i)) || /其\s*$/u.test(source.slice(0, begin)))) { text = ''; }
             if (eligible && text && offset >= begin && offset < i) { return { start: begin, end: i, text }; }
