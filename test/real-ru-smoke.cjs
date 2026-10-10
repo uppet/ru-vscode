@@ -26,6 +26,7 @@ try {
         const expectedPractical = {
             '文本整理': '[小明, 小红]\n你好\n梨\n3.50\n',
             '数学计算': '9\n32\n-1\n-2\n-1\n-2\n',
+            '典命名参数': '0\n2\n真\n1\n',
             '阵删弹查': '1\n车\n船\n空\n'
         };
         if (name in expectedPractical || name === '随机种子') {
@@ -64,10 +65,10 @@ try {
     assert.equal(references.status, 0, references.stderr || String(references.error));
     assert.equal(references.stdout, '1\n好\n');
     fs.writeFileSync(file, `表 取 典: ‘上’ 对 0. ‘下’ 对 2. 成.
-显 表 其 查 ‘上’.
-显 表 其 除 ‘下’.
-显 表 其 除 ‘下’.
-表 其 增 ‘左’ 3.
+显 表 其 查 目:‘上’.
+显 表 其 除 目:‘下’.
+显 表 其 除 目:‘下’.
+表 其 增 目:‘左’ 相:3.
 显 表 其 量.
 表 其 列 作 键, 值:
     显 值.
@@ -90,6 +91,16 @@ try {
     assert.deepEqual(lines.slice(0,4), ['0','真','假','2']);
     assert.deepEqual(lines.slice(4,6).sort(), ['0','3']); // snapshot iteration order is unspecified
     assert.deepEqual(lines.slice(6), ['0','真','真','真','真','假','假','真','真']);
+    for (const call of ["查 键:'上'", "除 键:'上'", "增 键:'下' 值:2", "增 目:'下' 值:2"]) {
+        fs.writeFileSync(file, `表 取 {'上': 0}.\n表 其 ${call}.\n`);
+        const oldNamed = cp.spawnSync(plan.executable, plan.args, { cwd: plan.cwd, encoding: 'utf8', timeout: 10000 });
+        assert.notEqual(oldNamed.status, 0, `legacy dictionary arguments accepted: ${call}`);
+        assert.ok(oldNamed.stderr, `expected a runtime diagnostic: ${call}`);
+    }
+    fs.writeFileSync(file, "表 取 {'上': 0}.\n表 其 列 回调:(作 键, 值: 显 值. 为).\n阵列 取 [].\n阵列 其 增 值:2.\n显 阵列 其 查 值:2.\n");
+    const unchangedNamed = cp.spawnSync(plan.executable, plan.args, { cwd: plan.cwd, encoding: 'utf8', timeout: 10000 });
+    assert.equal(unchangedNamed.status, 0, unchangedNamed.stderr || String(unchangedNamed.error));
+    assert.equal(unchangedNamed.stdout, '0\n0\n');
     fs.writeFileSync(file, "表 取 {'心': 0, '意': 1}.\n显 表 其 查 '意'.\n显 {} 其 量.\n");
     const symbols = cp.spawnSync(plan.executable, plan.args, { cwd: plan.cwd, encoding: 'utf8', timeout: 10000 });
     assert.equal(symbols.status, 0, symbols.stderr || String(symbols.error));

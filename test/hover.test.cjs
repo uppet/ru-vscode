@@ -31,7 +31,7 @@ test('fact and map hover explains changed semantics and ordinary method contract
     const facts = hoverAt('事实',0).text;
     for (const term of ['只有空、假','0、空句、空阵和空典','独立类型','短路']) assert.ok(facts.includes(term));
     const map = hoverAt('典',0).text;
-    for (const term of ['普通方法名','无序快照','返回事实','安全整数','相同印值']) assert.ok(map.includes(term));
+    for (const term of ['普通方法名','无序快照','返回事实','安全整数','相同印值','查 目','增 目 相','除 目','0.12.1','列的参数名仍为回调']) assert.ok(map.includes(term));
     for (const word of ['查','增','除','列','同','印']) assert.equal(hoverAt(word,0),undefined);
     for (const source of ['完成','事实值','字典','真假','𠀀成','# 成','批. 真','解. 假 释.', '‘典’']) {
         for (let i=0;i<source.length;i++) assert.equal(hoverAt(source,i),undefined,source);
@@ -60,7 +60,18 @@ test('practical member hover is contextual and distinguishes array from dictiona
         for (const source of [word, `${word} 取 1.`, `其他 ${word}.`, `𠀀其 ${word}.`, `其 ${word}值.`, `其 2 ${word}.`, `其 '${word}'.`, `# 其 ${word}`, `解. 其 ${word} 释.`, `# 其\n${word}.`, `其 '文字' ${word}.`]) assert.equal(hoverAt(source,source.lastIndexOf(word)),undefined,source);
     }
     const lookup=hoverAt('列 其 查 值:1.',4).text;
-    for (const text of ['零起点位置','浅元素快照','键:目标','不判断接收者类型']) assert.ok(lookup.includes(text));
+    for (const text of ['零起点位置','浅元素快照','目:目标','不判断接收者类型']) assert.ok(lookup.includes(text));
     assert.ok(hoverAt('列 其 弹.',4).text.includes('不写()'));
     for (const word of ['拆分','替换','去空白','定点','平方根','幂','取整','向下取整','向上取整','四舍五入','造源','整数','洗牌']) assert.equal(hoverAt(`模块 其 ${word}.`,5),undefined,word);
+});
+
+test('dictionary named parameters and array value parameters stay distinct', () => {
+    const lookup = hoverAt('表 其 查 目:1.', 4).text;
+    assert.ok(lookup.includes('阵 其 查 值:目标.'));
+    assert.ok(lookup.includes('典 其 查 目:目标.'));
+    assert.ok(!lookup.includes('键:'));
+    const snippets = require('../snippets/ru.json');
+    assert.ok(snippets['典列回调'].body.join('\n').includes('${2:目}, ${3:相}'));
+    for (const term of ['查 目:', '增 目:', '相:', '除 目:']) assert.ok(snippets['典命名参数'].body.join('\n').includes(term));
+    assert.ok(snippets['阵删弹查'].body.join('\n').includes('查 值:'));
 });

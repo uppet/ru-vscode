@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.2 — 2026-10-10
+
+- Sync Ru 0.12.1 dictionary named parameters: 查/除 目, 增 目/相, without legacy 键/值 aliases.
+- Update dictionary terminology, hover and snippets; preserve array 值 parameters and user-defined callback names.
+- Add named-argument runtime, snippet and hover regressions.
+
 ## 0.4.1 — 2026-10-09
 
 - Sync Ru 0.12 practical text, math, random and array libraries.

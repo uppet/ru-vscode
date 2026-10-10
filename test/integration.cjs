@@ -111,11 +111,13 @@ exports.run = async () => {
         const found=await vscode.commands.executeCommand('vscode.executeHoverProvider',practicalDoc.uri,new vscode.Position(line,4));
         assert.ok(found.some(h=>h.contents.some(c=>c.value?.includes('0.12.0'))),'practical member hover');
     }
+    const lookupHelp = await vscode.commands.executeCommand('vscode.executeHoverProvider', practicalDoc.uri, new vscode.Position(2,4));
+    assert.ok(lookupHelp.some(h => h.contents.some(c => c.value?.includes('典 其 查 目:目标.') && c.value.includes('阵 其 查 值:目标.'))), 'dictionary and array named parameters differ');
     for (const [line,col] of [[3,0],[4,6]]) {
         const hidden=await vscode.commands.executeCommand('vscode.executeHoverProvider',practicalDoc.uri,new vscode.Position(line,col));
         assert.equal(hidden.length,0,'ordinary name/comment has no practical hover');
     }
-    for (const name of ['文本整理','数学计算','随机种子','阵删弹查']) {
+    for (const name of ['文本整理','数学计算','随机种子','阵删弹查','典命名参数']) {
         const doc=await vscode.workspace.openTextDocument({language:'ru',content:''});
         const ed=await vscode.window.showTextDocument(doc);
         const body=require('../snippets/ru.json')[name].body.join('\n');
