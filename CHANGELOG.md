@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.0 — 2026-10-11
+
+- Sync Ru 0.13: rename contest imports to 如竞 without the old 如:竞赛 alias.
+- Add 如观 drawing and interactive animation snippets, with import hover and explicit 如书 Python-only execution guidance.
+- Update internal contest bridge highlighting and regression coverage; CLI launch behavior stays unchanged.
+
 ## 0.4.2 — 2026-10-10
 
 - Sync Ru 0.12.1 dictionary named parameters: 查/除 目, 增 目/相, without legacy 键/值 aliases.

@@ -230,3 +230,8 @@ test('practical members have contextual coloring, ordinary exports never become 
         has(`模块 其 ${word}.`,word,'variable.other.ru');
     }
 });
+
+test('renamed contest bridge is builtin while module and drawing names stay ordinary', () => {
+    for (const name of ['__如竞', '__如观']) has(name, name, 'support.function.builtin.ru');
+    for (const name of ['__竞赛', '如竞', '如观', '画布', '每帧', '鼠标按下']) has(name, name, 'variable.other.ru');
+});

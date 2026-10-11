@@ -215,7 +215,7 @@
     },
     {
       "name": "support.function.builtin.ru",
-      "match": "(?<![\\p{L}\\p{N}_])(?:读|件|录|件作成果|读取|显出|错误|__竞赛)(?![\\p{L}\\p{N}_])"
+      "match": "(?<![\\p{L}\\p{N}_])(?:读|件|录|件作成果|读取|显出|错误|__如竞|__如观)(?![\\p{L}\\p{N}_])"
     },
     {
       "name": "keyword.operator.assignment.ru",

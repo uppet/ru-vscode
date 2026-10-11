@@ -22,7 +22,22 @@ try {
         const file = path.join(temp, `${name}.ru`);
         fs.writeFileSync(file, source);
         const result = cp.spawnSync(interpreterPath, [cli, 'check', file], { encoding: 'utf8', timeout: 10000 });
-        assert.equal(result.status, 0, `${name}: ${result.stderr || result.error}`);
+        if (name.startsWith('如观')) {
+            assert.notEqual(result.status, 0, 'CLI check must report notebook-only graphics');
+            assert.match(result.stderr, /如书/);
+            const graphicsHost = cp.spawnSync(interpreterPath, [path.join(__dirname, 'graphics-snippet-smoke.py'), path.resolve(root), file, name], { encoding: 'utf8', timeout: 10000 });
+            assert.equal(graphicsHost.status, 0, graphicsHost.stderr || String(graphicsHost.error));
+        } else assert.equal(result.status, 0, `${name}: ${result.stderr || result.error}`);
+        if (name === '竞赛模板') {
+            const contest = cp.spawnSync(interpreterPath, [cli, 'run', file], { input: '42\n', encoding: 'utf8', timeout: 10000 });
+            assert.equal(contest.status, 0, contest.stderr);
+            assert.equal(contest.stdout, '42\n');
+        }
+        if (name.startsWith('如观')) {
+            const graphics = cp.spawnSync(interpreterPath, [cli, 'run', file], { encoding: 'utf8', timeout: 10000 });
+            assert.notEqual(graphics.status, 0, 'ordinary CLI must not silently run notebook graphics');
+            assert.match(graphics.stderr, /如书/);
+        }
         const expectedPractical = {
             '文本整理': '[小明, 小红]\n你好\n梨\n3.50\n',
             '数学计算': '9\n32\n-1\n-2\n-1\n-2\n',
@@ -43,6 +58,11 @@ try {
             }
         }
     }
+    const oldContestFile = path.join(temp, 'legacy-contest.ru');
+    fs.writeFileSync(oldContestFile, "尽 取 外言 '如:竞赛'.\n");
+    const oldContest = cp.spawnSync(interpreterPath, [cli, 'run', oldContestFile], { encoding: 'utf8', timeout: 10000 });
+    assert.notEqual(oldContest.status, 0, 'removed contest alias must not run');
+    assert.match(oldContest.stderr, /如竞/);
     const file = path.join(temp, '你好 空 格;$(no shell).ru');
     fs.writeFileSync(file, '算 元初 外参 为 句 阵:\n    显 外参.\n    显 读.\n    得 0.\n法\n');
     const plan = buildLaunchPlan({ interpreterPath, interpreterArguments: ['-u'], cliPath: cli,
@@ -128,5 +148,5 @@ try {
     const scopes = cp.spawnSync(plan.executable, plan.args, { cwd: plan.cwd, encoding: 'utf8', timeout: 10000 });
     assert.equal(scopes.status, 0, scopes.stderr || String(scopes.error));
     assert.equal(scopes.stdout, '2\n3\n2\n1\n4\n1\n1\n');
-    console.log('PASS: all snippets checked by actual Ru; Unicode/space/metacharacter paths, argv, stdin, and explicit/natural procedure completion through real interpreter.');
+    console.log('PASS: CLI snippets checked by actual Ru; graphics snippets executed with GraphicsHost, CLI/check rejection verified; Unicode/space/metacharacter paths, argv, stdin, and explicit/natural procedure completion through real interpreter.');
 } finally { fs.rmSync(temp, { recursive: true, force: true }); }
