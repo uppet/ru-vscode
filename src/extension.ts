@@ -78,7 +78,7 @@ export function activate(context: vscode.ExtensionContext): void {
             // Recheck after filesystem awaits: another invocation may have started this file.
             if (running.has(key)) { return; }
             const task = new vscode.Task({ type: 'ru', file: key }, folder ?? vscode.TaskScope.Global,
-                `运行 ${path.basename(file)}`, '如言', new vscode.ProcessExecution(plan.executable, plan.args, { cwd: plan.cwd }), []);
+                `运行 ${path.basename(file)}`, '如言', new vscode.ProcessExecution(plan.executable, plan.args, { cwd: plan.cwd }), ['$ru']);
             task.presentationOptions = { reveal: vscode.TaskRevealKind.Always, focus: true,
                 panel: vscode.TaskPanelKind.Dedicated, clear: true, showReuseMessage: false };
             startedKey = key;

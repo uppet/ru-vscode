@@ -1,3 +1,9 @@
+## 0.5.1 · 2026-10-12
+
+- 为 Run Current File 任务接入 `$ru` problem matcher，识别标准 `file:line[:column]: error:` 及旧中文诊断格式。
+- Problems 面板按原始如源码行定位；保留终端中的原始列信息，避免将 Unicode 码点列误当 UTF-16 列。
+- 排除 REPL、如书格子等虚拟来源，避免错误跳转到磁盘文件。
+
 # Changelog
 
 ## 0.5.0 — 2026-10-11

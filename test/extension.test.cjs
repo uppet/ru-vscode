@@ -22,7 +22,7 @@ function setup(options = {}) {
         commands: { registerCommand: (id, cb) => { assert.equal(id, 'ru.runFile'); command = cb; return { dispose() {} }; } },
         tasks: { taskExecutions: [], onDidEndTask: cb => { endTask = cb; return { dispose() {} }; },
             executeTask: async task => { executions.push(task); if (options.fail) throw new Error('launch failed'); return { task }; } },
-        Task: class { constructor(definition, scope, name, source, execution) { Object.assign(this, { definition, scope, name, source, execution }); } },
+        Task: class { constructor(definition, scope, name, source, execution, problemMatchers) { Object.assign(this, { definition, scope, name, source, execution, problemMatchers }); } },
         ProcessExecution: class { constructor(process, args, options) { Object.assign(this, { process, args, options }); } },
         TaskScope: { Global: 1 }, TaskRevealKind: { Always: 1 }, TaskPanelKind: { Dedicated: 2 }
     };
@@ -38,6 +38,7 @@ test('run uses ProcessExecution with interactive terminal, exact Unicode argv an
     const task = x.executions[0];
     assert.deepEqual(task.execution.args, ['-u', '-m', 'rulang', 'run', x.document.uri.fsPath]);
     assert.equal(task.execution.options.cwd, tmp);
+    assert.deepEqual(task.problemMatchers, ['$ru']);
     assert.equal(task.presentationOptions.focus, true);
     assert.equal(task.presentationOptions.clear, true);
 });

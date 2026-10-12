@@ -13,7 +13,7 @@ exports.run = async () => {
     const helper = path.join(root, '假 CLI.py');
     const report = path.join(root, 'report.json');
     await fs.writeFile(file, "显 '你好'.\n");
-    await fs.writeFile(helper, `import json, os, sys\nline = sys.stdin.readline()\nwith open(${JSON.stringify(report)}, 'w', encoding='utf-8') as f:\n    json.dump({'argv':sys.argv[1:], 'cwd':os.getcwd(), 'stdin':line},f,ensure_ascii=False)\nprint('RUN_OK', flush=True)\nsys.exit(7)\n`);
+    await fs.writeFile(helper, `import json, os, sys\nprint(f'{sys.argv[2]}:1:3: error: 运行错误：测试定位', file=sys.stderr, flush=True)\nline = sys.stdin.readline()\nwith open(${JSON.stringify(report)}, 'w', encoding='utf-8') as f:\n    json.dump({'argv':sys.argv[1:], 'cwd':os.getcwd(), 'stdin':line},f,ensure_ascii=False)\nprint('RUN_OK', flush=True)\nsys.exit(7)\n`);
     const config = vscode.workspace.getConfiguration('ru');
     for (const [k, v] of Object.entries({ interpreterPath: process.platform === 'win32' ? 'python' : 'python3', cliPath: helper, programArguments: ['a b', '你好', '$(no shell)'] })) {
         await config.update(k, v, vscode.ConfigurationTarget.Workspace);
@@ -130,6 +130,10 @@ exports.run = async () => {
     try {
         await vscode.commands.executeCommand('ru.runFile');
         await until(() => starts.length === 1, 'process start');
+        await until(() => vscode.languages.getDiagnostics(document.uri).some(d => d.message.includes('测试定位')), 'stderr diagnostic');
+        const diagnostic = vscode.languages.getDiagnostics(document.uri).find(d => d.message.includes('测试定位'));
+        assert.equal(diagnostic.range.start.line, 0, 'one-based text line becomes zero-based API line');
+        assert.equal(diagnostic.range.start.character, 0, 'line navigation intentionally ignores codepoint column');
         await vscode.window.showTextDocument(document);
         await vscode.commands.executeCommand('ru.runFile');
         assert.equal(starts.length, 1, 'no duplicate while running');
