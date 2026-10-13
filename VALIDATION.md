@@ -1,3 +1,13 @@
+## 0.8.0 local verification · 2026-10-13
+
+- Independent copy of 0.7.0 source tree `ba26991439ff67e623c1f70d90949d8ae2a64d0d`; original checkout preserved. No remote publication or CI rerun by this task.
+- Contract and real-interpreter source: Ru `2663b0712a06647e21f4c4d4440b10c50ffcfdb2` (Ru 0.19.0 / 如书 0.8.0), `docs/ruguan-guide.md` and `rulang/language-spec.md`.
+- `npm run lint`: TypeScript and manifest/grammar/snippet validation passed.
+- `npm test`: 54 unit tests passed, including all 11 new contextual members, ordinary bindings, Unicode boundaries, strings and comments.
+- `RU_LANGUAGE_ROOT=/workspace/shared/ru-graphics-upgrade npm run test:ru`: all 37 default-expanded snippets passed against actual Ru. Three graphics snippets ran with the real Python GraphicsHost; the new transform snippet verifies exact polygon points, accumulated matrix, fixed clipping snapshot, restored state and repeat execution. Ordinary CLI/check rejection remains verified.
+- `npm run package`: VSIX created with compiled extension, grammar, snippets and documentation; ZIP integrity and package version checked separately.
+- Extension-host regression source also covers new hover registration/suppression and snippet insertion. It was not executed locally: this cloud executor has no Xvfb/display. No new browser-js visual, Windows/macOS GUI or remote-host validation is claimed. Check remote CI separately for its exact published commit.
+
 ## 0.7.0 local verification · 2026-10-13
 
 - Independent copy of the existing 0.6.0 working tree; original checkout preserved. No remote publication.

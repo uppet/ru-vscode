@@ -117,7 +117,16 @@ exports.run = async () => {
         const hidden=await vscode.commands.executeCommand('vscode.executeHoverProvider',practicalDoc.uri,new vscode.Position(line,col));
         assert.equal(hidden.length,0,'ordinary name/comment has no practical hover');
     }
-    for (const name of ['文本整理','数学计算','随机种子','阵删弹查','典命名参数','如观绘图','如观动画交互']) {
+    const graphicsDoc = await vscode.workspace.openTextDocument({language:'ru', content:'图 其 旋转 0.3.\n图 其 保存.\n旋转 取 1.\n批. 其 保存.'});
+    for (const line of [0,1]) {
+        const found = await vscode.commands.executeCommand('vscode.executeHoverProvider', graphicsDoc.uri, new vscode.Position(line,4));
+        assert.ok(found.some(h => h.contents.some(c => c.value?.includes('Ru 0.19.0／如书 0.8.0'))), 'graphics member hover registered');
+    }
+    for (const [line,col] of [[2,0],[3,6]]) {
+        const hidden = await vscode.commands.executeCommand('vscode.executeHoverProvider', graphicsDoc.uri, new vscode.Position(line,col));
+        assert.equal(hidden.length,0,'ordinary name/comment has no graphics hover');
+    }
+    for (const name of ['文本整理','数学计算','随机种子','阵删弹查','典命名参数','如观绘图','如观动画交互','如观形状变换']) {
         const doc=await vscode.workspace.openTextDocument({language:'ru',content:''});
         const ed=await vscode.window.showTextDocument(doc);
         const body=require('../snippets/ru.json')[name].body.join('\n');

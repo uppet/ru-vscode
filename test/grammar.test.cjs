@@ -248,3 +248,11 @@ test('canonical module imports keep namespace colons inside strings', () => {
         }
     }
 });
+
+test('graphics names are contextual members, never reserved words', () => {
+    for (const word of ["三角形", "多边形", "平移", "旋转", "缩放", "保存", "恢复", "变换", "重置变换", "裁剪", "取消裁剪"]) {
+        for (const gap of [' ', '\t']) has(`图 其${gap}${word}.`, word, 'support.function.member.ru');
+        for (const text of [word, `${word} 取 1.`, `其他 ${word}.`, `其 ${word}值.`, `𠀀其 ${word}.`]) has(text,word,'variable.other.ru');
+        for (const line of [`# 其 ${word}.`, `批. 其 ${word}.`, `解. 其 ${word}. 释.`, `'其 ${word}.'`, `“其 ${word}.”`]) assert.ok(!scopes(line,line.indexOf(word)).includes('support.function.member.ru'));
+    }
+});

@@ -1,3 +1,10 @@
+## 0.8.0 · 2026-10-13
+
+- Sync Ru 0.19.0 / 如书 0.8.0: contextual highlighting and lexical hover for 三角形、多边形、平移、旋转、缩放、保存、恢复、变换、重置变换、裁剪、取消裁剪.
+- Document native nonzero paths, right-multiplied Canvas transforms, clipping snapshots and intersections, state-stack pairing, limits, and callback reset behavior.
+- Add one compact notebook graphics snippet with explicit save/restore; execute it using the actual GraphicsHost and verify transform/clip snapshots and repeated-cell execution.
+- Preserve ordinary identifiers, string/comment protection, existing snippets and CLI launch behavior; no new reserved words, commands or dependencies.
+
 ## 0.7.0 · 2026-10-13
 
 - Sync Ru 0.18.0: contextual member highlighting and hover for array 排序, 另成, 逐位 and dictionary 逐目.

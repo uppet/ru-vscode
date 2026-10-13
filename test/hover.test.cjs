@@ -113,3 +113,21 @@ test('traversal hints preserve callback and migration contracts', () => {
             assert.equal(hoverAt(source,source.indexOf(word)),undefined);
     }
 });
+
+test('graphics member hover stays contextual and states host and state contracts', () => {
+    for (const word of ["三角形", "多边形", "平移", "旋转", "缩放", "保存", "恢复", "变换", "重置变换", "裁剪", "取消裁剪"]) {
+        for (const gap of [' ', '\t', '\n']) {
+            const source = `图 其${gap}${word}.`;
+            const text = hoverAt(source, source.indexOf(word))?.text;
+            assert.match(text, /Ru 0.19.0／如书 0.8.0/);
+            assert.match(text, /Python \/ browser-js/);
+            assert.match(text, /不判断接收者类型/);
+        }
+        for (const source of [word, `${word} 取 1.`, `其他 ${word}.`, `𠀀其 ${word}.`, `其 ${word}值.`, `其 2 ${word}.`, `其 '${word}'.`, `# 其 ${word}`, `批. 其 ${word}`, `解. 其 ${word} 释.`])
+            assert.equal(hoverAt(source, source.lastIndexOf(word)), undefined, source);
+    }
+    for (const [word, phrases] of Object.entries({多边形:['3～256','nonzero'],变换:['右乘','a*x+c*y+e'],缩放:['零与负倍率'],保存:['64层','不自动恢复'],恢复:['空栈','关闭交互'],裁剪:['32个','交集','快照'],重置变换:['不改变已有裁剪'],取消裁剪:['不改变当前矩阵']})) {
+        const source = `图 其 ${word}.`;
+        for (const phrase of phrases) assert.ok(hoverAt(source,4).text.includes(phrase), `${word}: ${phrase}`);
+    }
+});
