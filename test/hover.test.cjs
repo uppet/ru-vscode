@@ -31,7 +31,7 @@ test('fact and map hover explains changed semantics and ordinary method contract
     const facts = hoverAt('事实',0).text;
     for (const term of ['只有空、假','0、空句、空阵和空典','独立类型','短路']) assert.ok(facts.includes(term));
     const map = hoverAt('典',0).text;
-    for (const term of ['普通方法名','无序快照','返回事实','安全整数','相同印值','查 目','增 目 相','除 目','0.12.1','列的参数名仍为回调']) assert.ok(map.includes(term));
+    for (const term of ['普通方法名','无序快照','返回事实','安全整数','相同印值','查 目','增 目 相','除 目','0.12.1','逐目的参数名仍为回调']) assert.ok(map.includes(term));
     for (const word of ['查','增','除','列','同','印']) assert.equal(hoverAt(word,0),undefined);
     for (const source of ['完成','事实值','字典','真假','𠀀成','# 成','批. 真','解. 假 释.', '‘典’']) {
         for (let i=0;i<source.length;i++) assert.equal(hoverAt(source,i),undefined,source);
@@ -71,7 +71,7 @@ test('dictionary named parameters and array value parameters stay distinct', () 
     assert.ok(lookup.includes('典 其 查 目:目标.'));
     assert.ok(!lookup.includes('键:'));
     const snippets = require('../snippets/ru.json');
-    assert.ok(snippets['典列回调'].body.join('\n').includes('${2:目}, ${3:相}'));
+    assert.ok(snippets['典逐目回调'].body.join('\n').includes('${2:目}, ${3:相}'));
     for (const term of ['查 目:', '增 目:', '相:', '除 目:']) assert.ok(snippets['典命名参数'].body.join('\n').includes(term));
     assert.ok(snippets['阵删弹查'].body.join('\n').includes('查 值:'));
 });
@@ -85,5 +85,31 @@ test('module import hover explains canonical names and notebook-only graphics', 
     for (const name of ['如观绘图', '如观动画交互']) {
         assert.ok(snippets[name].body[0].includes("'如:观'"));
         assert.ok(snippets[name].description.includes('如书 Python / browser-js'));
+    }
+});
+
+
+test('array sort and map hints are contextual and describe distinct callbacks', () => {
+    for (const word of ['排序','另成']) {
+        assert.equal(hoverAt(`${word} 取 1.`, 0), undefined);
+        for (const source of [`# 其 ${word}.`, `'其 ${word}.'`, `批. 其 ${word}.`, `解. 其 ${word}. 释.`])
+            assert.equal(hoverAt(source, source.indexOf(word)), undefined);
+        assert.match(hoverAt(`列 其 ${word}.`,4).text, /新阵|新浅复制阵/);
+    }
+    assert.match(hoverAt('列 其 排序.',4).text, /先于:二参算/);
+    assert.match(hoverAt('列 其 另成.',4).text, /不接受作/);
+    const snippets=require('../snippets/ru.json');
+    assert.ok(snippets['阵排序另成'].body.join('\n').includes('算法:'));
+});
+
+
+test('traversal hints preserve callback and migration contracts', () => {
+    assert.match(hoverAt('列 其 逐位.',4).text, /位、值/);
+    assert.match(hoverAt('表 其 逐目.',4).text, /目、相/);
+    assert.match(hoverAt('表 其 逐目.',4).text, /旧典列已移除/);
+    for (const word of ['逐位','逐目']) {
+        assert.equal(hoverAt(`${word} 取 1.`,0),undefined);
+        for(const source of [`# 其 ${word}.`, `'其 ${word}.'`, `批. 其 ${word}.`, `解. 其 ${word}. 释.`])
+            assert.equal(hoverAt(source,source.indexOf(word)),undefined);
     }
 });

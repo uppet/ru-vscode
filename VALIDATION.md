@@ -1,3 +1,11 @@
+## 0.7.0 local verification · 2026-10-13
+
+- Independent copy of the existing 0.6.0 working tree; original checkout preserved. No remote publication.
+- `npm run lint`: TypeScript and manifest/grammar/snippet validation passed.
+- `npm test`: 52 unit tests passed, including contextual member hover and grammar.
+- `RU_LANGUAGE_ROOT=/workspace/shared/ru-array-interfaces npm run test:ru`: passed against the integrated Ru toolchain, including every snippet and exact output assertions for new sorting/transformation/traversal examples.
+- These are local command-line checks; no new VS Code extension-host or visual session is claimed. Packaging is a separate final step.
+
 # Validation — 0.4.0
 
 Prepared 2026-10-09 for the Ru 0.10.0 release.

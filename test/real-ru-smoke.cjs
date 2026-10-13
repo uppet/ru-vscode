@@ -16,7 +16,7 @@ try {
         let source = snippet.body.join('\n').replace(/\$\{(\d+):([^}]*)\}/g, (_, key, value) => (defaults[key] = value))
             .replace(/\$\{(\d+)\}/g, (_, key) => defaults[key]).replaceAll('$0', '');
         if (name === '典字面量' || name === '空典' || name === '符号典' || name === '符号空典') source = `表 取 ${source.trim()}.\n`;
-        if (name === '典列回调') source = `表 取 典: ‘上’ 对 0. 成.\n${source}`;
+        if (name === '典逐目回调') source = `表 取 典: ‘上’ 对 0. 成.\n${source}`;
         if (name.startsWith('匿名')) source = `回调 取 ${source.trim()}.\n`;
         if (name === '过程提前结束') source = `作 提前结束:\n${source}\n为\n`;
         const file = path.join(temp, `${name}.ru`);
@@ -42,7 +42,9 @@ try {
             '文本整理': '[小明, 小红]\n你好\n梨\n3.50\n',
             '数学计算': '9\n32\n-1\n-2\n-1\n-2\n',
             '典命名参数': '0\n2\n真\n1\n',
-            '阵删弹查': '1\n车\n船\n空\n'
+            '阵删弹查': '1\n车\n船\n空\n',
+            '阵逐位回调': '1\n桃\n空\n空\n170\n',
+            '阵排序另成': '[1, 1, 2, 3]\n[3, 1, 2, 1]\n[3, 2, 1, 1]\n[乙, 甲, 丙]\n2\n7\n7\n[空, 空]\n'
         };
         if (name in expectedPractical || name === '随机种子') {
             const run = cp.spawnSync(interpreterPath, [cli, 'run', file], { encoding: 'utf8', timeout: 10000 });
@@ -92,7 +94,7 @@ try {
 显 表 其 除 目:‘下’.
 表 其 增 目:‘左’ 相:3.
 显 表 其 量.
-表 其 列 作 键, 值:
+表 其 逐目 作 键, 值:
     显 值.
     表 其 除 键.
 为.
@@ -119,7 +121,7 @@ try {
         assert.notEqual(oldNamed.status, 0, `legacy dictionary arguments accepted: ${call}`);
         assert.ok(oldNamed.stderr, `expected a runtime diagnostic: ${call}`);
     }
-    fs.writeFileSync(file, "表 取 {'上': 0}.\n表 其 列 回调:(作 键, 值: 显 值. 为).\n阵列 取 [].\n阵列 其 增 值:2.\n显 阵列 其 查 值:2.\n");
+    fs.writeFileSync(file, "表 取 {'上': 0}.\n表 其 逐目 回调:(作 键, 值: 显 值. 为).\n阵列 取 [].\n阵列 其 增 值:2.\n显 阵列 其 查 值:2.\n");
     const unchangedNamed = cp.spawnSync(plan.executable, plan.args, { cwd: plan.cwd, encoding: 'utf8', timeout: 10000 });
     assert.equal(unchangedNamed.status, 0, unchangedNamed.stderr || String(unchangedNamed.error));
     assert.equal(unchangedNamed.stdout, '0\n0\n');

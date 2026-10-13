@@ -1,3 +1,10 @@
+## 0.7.0 · 2026-10-13
+
+- Sync Ru 0.18.0: contextual member highlighting and hover for array 排序, 另成, 逐位 and dictionary 逐目.
+- Teach stable shallow sorting, exact fact-valued 先于 predicates, one-argument 算 transformation, and snapshot traversal without filtering or deep copying.
+- Add runnable sort/object transformation and traversal snippets; migrate dictionary 列 snippets to 逐目 while leaving directory 列 and the legacy 如:竞 three-way comparator unchanged.
+- Cover contextual hover, grammar and real-Ru snippet execution; preserve CLI launch and diagnostic behavior.
+
 ## 0.6.0 · 2026-10-13
 
 - Sync Ru 0.17.0: use canonical standard-module imports `如:观` and `如:竞`; product names remain 如观 and 如竞.

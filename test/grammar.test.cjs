@@ -220,7 +220,7 @@ test('assignment aliases stay distinct from map fields, named arguments and bloc
     for(const line of ['# :=','批. ：=','解. := 释.', '“:=”']) assert.ok(!grammar.tokenizeLine(line).tokens.some(t=>t.scopes.includes('keyword.operator.assignment.ru')),line);
 });
 test('practical members have contextual coloring, ordinary exports never become keywords', () => {
-    for (const word of ['删','弹','查']) {
+    for (const word of ['删','弹','查','排序','另成','逐位','逐目']) {
         has(`列 其 ${word}.`,word,'support.function.member.ru');
         for (const text of [word, `${word} 取 1.`, `其他 ${word}.`, `其 ${word}值.`, `𠀀其 ${word}.`]) has(text,word,'variable.other.ru');
         for (const line of [`# 其 ${word}.`, `批. 其 ${word}.`, `解. 其 ${word}. 释.`, `'其 ${word}.'`]) assert.ok(!scopes(line,line.indexOf(word)).includes('support.function.member.ru'));
