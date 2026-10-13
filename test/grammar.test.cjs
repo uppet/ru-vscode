@@ -235,3 +235,16 @@ test('renamed contest bridge is builtin while module and drawing names stay ordi
     for (const name of ['__如竞', '__如观']) has(name, name, 'support.function.builtin.ru');
     for (const name of ['__竞赛', '如竞', '如观', '画布', '每帧', '鼠标按下']) has(name, name, 'variable.other.ru');
 });
+
+test('canonical module imports keep namespace colons inside strings', () => {
+    for (const module of ['如:竞', '如:观']) {
+        for (const [open, close] of [["'", "'"], ['"', '"'], ['‘', '’'], ['“', '”']]) {
+            const line = `模块 取 外言 ${open}${module}${close}. 显 1.`;
+            for (let index = line.indexOf(open); index <= line.indexOf(close, line.indexOf(open) + 1); index++) {
+                assert.ok(scopes(line, index).includes('string.quoted.ru'));
+                assert.ok(!scopes(line, index).some(scope => scope.startsWith('punctuation.separator')));
+            }
+            has(line, '显', 'keyword.control.ru');
+        }
+    }
+});

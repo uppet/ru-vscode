@@ -58,11 +58,13 @@ try {
             }
         }
     }
-    const oldContestFile = path.join(temp, 'legacy-contest.ru');
-    fs.writeFileSync(oldContestFile, "尽 取 外言 '如:竞赛'.\n");
-    const oldContest = cp.spawnSync(interpreterPath, [cli, 'run', oldContestFile], { encoding: 'utf8', timeout: 10000 });
-    assert.notEqual(oldContest.status, 0, 'removed contest alias must not run');
-    assert.match(oldContest.stderr, /如竞/);
+    for (const [oldName, canonical] of [['如竞', '如:竞'], ['如观', '如:观'], ['如:竞赛', '如:竞']]) {
+        const oldModuleFile = path.join(temp, 'legacy-module.ru');
+        fs.writeFileSync(oldModuleFile, `模块 取 外言 '${oldName}'.\n`);
+        const oldModule = cp.spawnSync(interpreterPath, [cli, 'run', oldModuleFile], { encoding: 'utf8', timeout: 10000 });
+        assert.notEqual(oldModule.status, 0, 'removed module alias must not run');
+        assert.ok(oldModule.stderr.includes(canonical), oldModule.stderr);
+    }
     const file = path.join(temp, '你好 空 格;$(no shell).ru');
     fs.writeFileSync(file, '算 元初 外参 为 句 阵:\n    显 外参.\n    显 读.\n    得 0.\n法\n');
     const plan = buildLaunchPlan({ interpreterPath, interpreterArguments: ['-u'], cliPath: cli,

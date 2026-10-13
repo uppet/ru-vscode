@@ -1,3 +1,9 @@
+## 0.6.0 · 2026-10-13
+
+- Sync Ru 0.17.0: use canonical standard-module imports `如:观` and `如:竞`; product names remain 如观 and 如竞.
+- Update snippets, import hover, and regression coverage; old imports `如观`, `如竞`, and `如:竞赛` require source migration rather than aliases.
+- Keep CLI launch and diagnostic behavior unchanged.
+
 ## 0.5.1 · 2026-10-12
 
 - 为 Run Current File 任务接入 `$ru` problem matcher，识别标准 `file:line[:column]: error:` 及旧中文诊断格式。

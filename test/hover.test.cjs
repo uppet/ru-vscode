@@ -77,13 +77,13 @@ test('dictionary named parameters and array value parameters stay distinct', () 
 });
 
 test('module import hover explains canonical names and notebook-only graphics', () => {
-    const help = hoverAt("尽 取 外言 '如观'.", 4).text;
-    for (const word of ['0.13', "外言 '如竞'", "外言 '如观'", '如书 Python', '普通 CLI', 'C / JS', '无兼容别名']) assert.ok(help.includes(word), word);
+    const help = hoverAt("尽 取 外言 '如:观'.", 4).text;
+    for (const word of ['如竞、如观、如:竞赛', "外言 '如:竞'", "外言 '如:观'", '如书 Python', '普通 CLI', 'C / Node.js', 'browser-js', '无兼容别名']) assert.ok(help.includes(word), word);
     for (const text of ["'外言'", '# 外言', '外言者']) assert.equal(hoverAt(text, text.indexOf('外言')), undefined);
     const snippets = require('../snippets/ru.json');
-    assert.ok(snippets['竞赛模板'].body[0].includes("'如竞'"));
+    assert.ok(snippets['竞赛模板'].body[0].includes("'如:竞'"));
     for (const name of ['如观绘图', '如观动画交互']) {
-        assert.ok(snippets[name].body[0].includes("'如观'"));
-        assert.ok(snippets[name].description.includes('仅如书 Python'));
+        assert.ok(snippets[name].body[0].includes("'如:观'"));
+        assert.ok(snippets[name].description.includes('如书 Python / browser-js'));
     }
 });
