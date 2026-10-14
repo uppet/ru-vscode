@@ -126,12 +126,22 @@ exports.run = async () => {
         const hidden = await vscode.commands.executeCommand('vscode.executeHoverProvider', graphicsDoc.uri, new vscode.Position(line,col));
         assert.equal(hidden.length,0,'ordinary name/comment has no graphics hover');
     }
-    for (const name of ['文本整理','数学计算','随机种子','阵删弹查','典命名参数','如观绘图','如观动画交互','如观形状变换']) {
+    const newGraphicsDoc = await vscode.workspace.openTextDocument({language:'ru', content:'观 其 颜色 255 0 0 128.\n图 其 文字对齐 横向:\'中\' 纵向:\'基线\'.\n显 图 其 经过秒.\n显 图 其 间隔秒.\n经过秒 取 1.\n“其 颜色”.\n批. 其 文字对齐.'});
+    for (const [line, col, version] of [[0,4,'0.19.1'],[1,4,'0.19.2'],[2,6,'0.19.3'],[3,6,'0.19.3']]) {
+        const found = await vscode.commands.executeCommand('vscode.executeHoverProvider', newGraphicsDoc.uri, new vscode.Position(line,col));
+        assert.ok(found.some(h => h.contents.some(c => c.value?.includes(version))), 'new graphics member hover registered');
+    }
+    for (const [line,col] of [[4,0],[5,3],[6,6]]) {
+        const hidden = await vscode.commands.executeCommand('vscode.executeHoverProvider', newGraphicsDoc.uri, new vscode.Position(line,col));
+        assert.equal(hidden.length,0,'ordinary name/string/comment has no new graphics hover');
+    }
+    for (const name of ['文本整理','数学计算','随机种子','阵删弹查','典命名参数','如观绘图','如观动画交互','如观形状变换','透明颜色','如观透明文字','如观计时动画']) {
         const doc=await vscode.workspace.openTextDocument({language:'ru',content:''});
         const ed=await vscode.window.showTextDocument(doc);
+        ed.options = {insertSpaces:true,tabSize:4};
         const body=require('../snippets/ru.json')[name].body.join('\n');
         await ed.insertSnippet(new vscode.SnippetString(body));
-        assert.equal(doc.getText(),body.replace('$0',''),name);
+        assert.equal(doc.getText(),body.replace('$0','').replaceAll('\t','    '),name);
     }
     await vscode.window.showTextDocument(document);
     const starts = [], ends = [];

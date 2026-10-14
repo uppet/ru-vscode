@@ -131,3 +131,32 @@ test('graphics member hover stays contextual and states host and state contracts
         for (const phrase of phrases) assert.ok(hoverAt(source,4).text.includes(phrase), `${word}: ${phrase}`);
     }
 });
+
+
+test('alpha, alignment and timing hover preserve ordinary identifiers and lexical boundaries', () => {
+    const versions = {'颜色': '0.19.1', '文字对齐': '0.19.2', '经过秒': '0.19.3', '间隔秒': '0.19.3'};
+    for (const [word, version] of Object.entries(versions)) {
+        for (const gap of [' ', '\t', '\n']) {
+            const source = `图 其${gap}${word}.`;
+            const text = hoverAt(source, source.indexOf(word))?.text;
+            for (const phrase of [version, 'Python', 'browser-js', '不判断接收者类型']) assert.ok(text?.includes(phrase), `${word}: ${phrase}`);
+        }
+        for (const source of [word, `${word} 取 1.`, `其他 ${word}.`, `𠀀其 ${word}.`, `其 ${word}值.`, `其 ${word}².`, `其 2 ${word}.`, `其 '${word}'.`, `# 其 ${word}`, `批. 其 ${word}`, `解. 其 ${word} 释.`, `其 '文字' ${word}.`, `其 # 注释\n${word}.`])
+            assert.equal(hoverAt(source, source.lastIndexOf(word)), undefined, source);
+    }
+});
+
+test('graphics color, text and clock help states exact versions and contracts', () => {
+    const expected = {
+        '颜色': ['四参均必需', '0～255', '#rrggbbaa', '不钳位', '红:', '绿:', '蓝:', '不透明度:', '不是画布成员', 'Python CLI 可单独调用', '#RRGGBB 或 #RRGGBBAA'],
+        '文字对齐': ['两参均必需', "'左'／'中'／'右'", "'上'／'中'／'下'／'基线'", '横向:', '纵向:', 'em框', '跨回调', '保存／恢复', '背景不重置', '不移动旧文字'],
+        '经过秒': ['只读', '零参数', '初值0', '单位秒', '暂停或隐藏', '单调', '快照', '冻结', '帧序号一个参数'],
+        '间隔秒': ['只读', '零参数', '初帧', '首帧为0', '输入回调内为0', '不改动上一帧时间', '重绑', '不截断、不补帧', '自行限制步长']
+    };
+    for (const [word, phrases] of Object.entries(expected)) {
+        const text = hoverAt(`图 其 ${word}.`, 4).text;
+        for (const phrase of phrases) assert.ok(text.includes(phrase), `${word}: ${phrase}`);
+    }
+    assert.ok(hoverAt("外言 '如:观'.", 0).text.includes('#RRGGBB 或 #RRGGBBAA'));
+    assert.ok(hoverAt('图 其 保存.', 4).text.includes('文字对齐'));
+});

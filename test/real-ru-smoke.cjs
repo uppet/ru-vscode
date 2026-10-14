@@ -27,6 +27,10 @@ try {
             assert.match(result.stderr, /如书/);
             const graphicsHost = cp.spawnSync(interpreterPath, [path.join(__dirname, 'graphics-snippet-smoke.py'), path.resolve(root), file, name], { encoding: 'utf8', timeout: 10000 });
             assert.equal(graphicsHost.status, 0, graphicsHost.stderr || String(graphicsHost.error));
+        } else if (name === '透明颜色') {
+            // check covers compiled-target capabilities; Python run alone can construct colors.
+            assert.notEqual(result.status, 0, 'CLI check still rejects the 如:观 module');
+            assert.match(result.stderr, /如书/);
         } else assert.equal(result.status, 0, `${name}: ${result.stderr || result.error}`);
         if (name === '竞赛模板') {
             const contest = cp.spawnSync(interpreterPath, [cli, 'run', file], { input: '42\n', encoding: 'utf8', timeout: 10000 });
@@ -39,6 +43,7 @@ try {
             assert.match(graphics.stderr, /如书/);
         }
         const expectedPractical = {
+            '透明颜色': '#ff404080\n#4070ff80\n',
             '文本整理': '[小明, 小红]\n你好\n梨\n3.50\n',
             '数学计算': '9\n32\n-1\n-2\n-1\n-2\n',
             '典命名参数': '0\n2\n真\n1\n',

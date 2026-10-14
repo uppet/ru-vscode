@@ -1,3 +1,10 @@
+## 0.8.1 · 2026-10-14
+
+- Sync three small Ru graphics updates: alpha colors / 颜色 (Ru 0.19.1+), 文字对齐 (0.19.2+), and 经过秒 / 间隔秒 (0.19.3+), with contextual member highlighting and lexical hover only.
+- Correct six-digit-only color help; document exact channel/alignment arguments, eight-digit opacity, captured text styles, monotonic callback snapshots, pause/resume and real frame gaps. No new reserved words.
+- Add three practical snippets: CLI-only color construction, transparent aligned notebook text, and elapsed/delta-time animation. Keep the one-parameter 每帧 callback and existing CLI/compiled-target capability boundaries.
+- Extend real-Ru snippet assertions for color values, text snapshots and restored styles, deterministic frame timing, pause/resume and repeated execution; keep launch commands, dependencies and interpreter installation unchanged.
+
 ## 0.8.0 · 2026-10-13
 
 - Sync Ru 0.19.0 / 如书 0.8.0: contextual highlighting and lexical hover for 三角形、多边形、平移、旋转、缩放、保存、恢复、变换、重置变换、裁剪、取消裁剪.

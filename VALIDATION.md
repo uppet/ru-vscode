@@ -1,3 +1,16 @@
+## 0.8.1 local verification · 2026-10-14
+
+- Independent copy of the 0.8.0 source tree `689dc6618deb53b8d865b8268e793c90ebddf3c5` (commit `1083fc87aa365125aa7503d9f153d1d946957ad8`); original checkout preserved. No remote publication, CI rerun or Library replacement by this task.
+- Contract and final real-interpreter source: Ru 0.19.3 / 如书 0.8.3, commit `2abe9e1fc9c8d4176b5e8fc1788e12f917db5263`, tree `62baa3cc0186cf7985a0c652ad1df614ce352396`; verified `docs/ruguan-guide.md` and `rulang/language-spec.md`.
+- `npm run lint`: strict TypeScript plus manifest/grammar/snippet validation passed.
+- `npm test`: all 57 unit tests passed, including contextual 颜色 / 文字对齐 / 经过秒 / 间隔秒, minimum-version and exact-argument help, ordinary names, Unicode boundaries, strings and comments. Existing launch/trust/diagnostic regressions passed unchanged.
+- `RU_LANGUAGE_ROOT=/workspace/shared/ru-graphics-time npm run test:ru`: all 40 default-expanded snippets checked against actual Ru. Five notebook snippets executed twice with the real Python GraphicsHost. The pure-color snippet ran through the ordinary Python CLI and returned exact eight-digit values; its `check` rejection preserves the existing compiled-target module boundary.
+- New real-host assertions cover transparent background and alpha color snapshots; centered / right-baseline text and saved/restored alignment across callbacks; frozen clock reads, first-frame zero delta, real frame movement, input zero delta, stop/resume first-frame zero delta, repeated continue, uncapped hidden/delayed gap and repeat execution.
+- Minimum-version checks additionally executed pure-color construction on Ru 0.19.1 (`3645e930e50b5f2cd66a10f904a123a843e60d00`) and transparent aligned text on Ru 0.19.2 (`d7e8400c8ed85bad805b0c79faa5e62491a641d0`).
+- An additional local smoke run compiled all six graphics-related snippets with the actual browser compiler and executed the generated browser runtime under Node, twice each. Color values, text alignment snapshots, time-driven movement and pause/resume behavior passed. This is browser-runtime coverage, not browser UI or canvas pixel validation.
+- `npm run package`: VSIX created; ZIP integrity, version 0.8.1, manifest, grammar, snippets, compiled extension and bundled documentation verified against the final working tree. No runtime dependencies added.
+- Extension-host regression source covers the new hovers and snippet insertion, and has a syntax check. Actual Electron extension-host testing was not run locally: this cloud executor has no Xvfb or display. No new Windows/macOS GUI, remote-host, VS Code UI or rendered browser validation is claimed; check CI separately for the exact published commit.
+
 ## 0.8.0 local verification · 2026-10-13
 
 - Independent copy of 0.7.0 source tree `ba26991439ff67e623c1f70d90949d8ae2a64d0d`; original checkout preserved. No remote publication or CI rerun by this task.
