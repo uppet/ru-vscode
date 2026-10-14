@@ -13,7 +13,12 @@ exports.run = async () => {
     const helper = path.join(root, '假 CLI.py');
     const report = path.join(root, 'report.json');
     await fs.writeFile(file, "显 '你好'.\n");
-    await fs.writeFile(helper, `import json, os, sys\nprint(f'{sys.argv[2]}:1:3: error: 运行错误：测试定位', file=sys.stderr, flush=True)\nline = sys.stdin.readline()\nwith open(${JSON.stringify(report)}, 'w', encoding='utf-8') as f:\n    json.dump({'argv':sys.argv[1:], 'cwd':os.getcwd(), 'stdin':line},f,ensure_ascii=False)\nprint('RUN_OK', flush=True)\nsys.exit(7)\n`);
+    async function writeHelper(message, exitCode) {
+        // Emit stderr before reading stdin to cover a real interactive task.
+        const diagnostic = message ? `print(f'{sys.argv[2]}:1:3: error: ' + ${JSON.stringify(message)}, file=sys.stderr, flush=True)\n` : '';
+        await fs.writeFile(helper, `import json, os, sys\n${diagnostic}line = sys.stdin.readline()\nwith open(${JSON.stringify(report)}, 'w', encoding='utf-8') as f:\n    json.dump({'argv':sys.argv[1:], 'cwd':os.getcwd(), 'stdin':line},f,ensure_ascii=False)\nprint('RUN_OK', flush=True)\nsys.exit(${exitCode})\n`);
+    }
+    await writeHelper('运行错误：测试定位', 7);
     const config = vscode.workspace.getConfiguration('ru');
     for (const [k, v] of Object.entries({ interpreterPath: process.platform === 'win32' ? 'python' : 'python3', cliPath: helper, programArguments: ['a b', '你好', '$(no shell)'] })) {
         await config.update(k, v, vscode.ConfigurationTarget.Workspace);
@@ -158,10 +163,6 @@ exports.run = async () => {
     try {
         await vscode.commands.executeCommand('ru.runFile');
         await until(() => starts.length === 1, 'process start');
-        await until(() => vscode.languages.getDiagnostics(document.uri).some(d => d.message.includes('测试定位')), 'stderr diagnostic');
-        const diagnostic = vscode.languages.getDiagnostics(document.uri).find(d => d.message.includes('测试定位'));
-        assert.equal(diagnostic.range.start.line, 0, 'one-based text line becomes zero-based API line');
-        assert.equal(diagnostic.range.start.character, 0, 'line navigation intentionally ignores codepoint column');
         await vscode.window.showTextDocument(document);
         await vscode.commands.executeCommand('ru.runFile');
         assert.equal(starts.length, 1, 'no duplicate while running');
@@ -169,16 +170,43 @@ exports.run = async () => {
         vscode.window.activeTerminal.sendText('终端输入 hello');
         await until(() => ends.length === 1, 'process exit');
         assert.equal(ends[0].exitCode, 7);
+        // Ordinary (non-background) VS Code task matchers buffer the current file's
+        // Problems until task completion. Waiting before sending stdin deadlocks.
+        await until(() => vscode.languages.getDiagnostics(document.uri).some(d => d.message === '运行错误：测试定位'), 'stderr diagnostic after exit');
+        const diagnostic = vscode.languages.getDiagnostics(document.uri).find(d => d.message === '运行错误：测试定位');
+        assert.equal(diagnostic.range.start.line, 0, 'one-based text line becomes zero-based API line');
+        assert.equal(diagnostic.range.start.character, 0, 'line navigation intentionally ignores codepoint column');
+        assert.equal(diagnostic.severity, vscode.DiagnosticSeverity.Error);
+        assert.equal(diagnostic.source, '如言');
         const result = JSON.parse(await fs.readFile(report, 'utf8'));
         assert.deepEqual(result.argv, ['run', file, '--', 'a b', '你好', '$(no shell)']);
         assert.equal(result.cwd, root);
         assert.equal(result.stdin.trim(), '终端输入 hello');
         await until(() => vscode.tasks.taskExecutions.length === 0, 'task cleanup');
+        await writeHelper('运行错误：重复定位', 7);
         await vscode.window.showTextDocument(document);
         await vscode.commands.executeCommand('ru.runFile');
         await until(() => starts.length === 2, 'repeat after exit');
         vscode.window.activeTerminal.sendText('second');
         await until(() => ends.length === 2, 'second exit');
-        console.log('PASS: real extension activation, association, process argv/cwd, terminal stdin, exit status, duplicate guard, and rerun.');
-    } finally { listeners.forEach(x => x.dispose()); }
+        assert.equal(ends[1].exitCode, 7);
+        await until(() => vscode.languages.getDiagnostics(document.uri).some(d => d.message === '运行错误：重复定位'), 'fresh stderr diagnostic after rerun');
+        assert.deepEqual(vscode.languages.getDiagnostics(document.uri).filter(d => d.source === '如言').map(d => d.message), ['运行错误：重复定位'], 'rerun replaces the old diagnostic');
+        await until(() => vscode.tasks.taskExecutions.length === 0, 'second task cleanup');
+        await writeHelper(undefined, 0);
+        await vscode.window.showTextDocument(document);
+        await vscode.commands.executeCommand('ru.runFile');
+        await until(() => starts.length === 3, 'clean rerun start');
+        vscode.window.activeTerminal.sendText('clean');
+        await until(() => ends.length === 3, 'clean rerun exit');
+        assert.equal(ends[2].exitCode, 0);
+        await until(() => !vscode.languages.getDiagnostics(document.uri).some(d => d.source === '如言'), 'clean rerun removes stale diagnostic');
+        await until(() => vscode.tasks.taskExecutions.length === 0, 'clean task cleanup');
+        console.log('PASS: real extension activation, association, process argv/cwd, terminal stdin, exit status, duplicate guard, rerun, post-exit Problems, diagnostic refresh and cleanup.');
+    } finally {
+        listeners.forEach(x => x.dispose());
+        for (const execution of vscode.tasks.taskExecutions) {
+            if (execution.task.definition.type === 'ru') execution.terminate();
+        }
+    }
 };
