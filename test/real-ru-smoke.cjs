@@ -32,6 +32,10 @@ try {
             assert.notEqual(result.status, 0, 'CLI check still rejects the 如:观 module');
             assert.match(result.stderr, /如书/);
         } else assert.equal(result.status, 0, `${name}: ${result.stderr || result.error}`);
+        if (name.startsWith('如观') || name === '透明颜色') {
+            const browserRuntime = cp.spawnSync(interpreterPath, [path.join(__dirname, 'browser-snippet-smoke.py'), path.resolve(root), file, name], { encoding: 'utf8', timeout: 15000 });
+            assert.equal(browserRuntime.status, 0, `${name} browser runtime: ${browserRuntime.stderr || browserRuntime.error}`);
+        }
         if (name === '竞赛模板') {
             const contest = cp.spawnSync(interpreterPath, [cli, 'run', file], { input: '42\n', encoding: 'utf8', timeout: 10000 });
             assert.equal(contest.status, 0, contest.stderr);
@@ -157,5 +161,5 @@ try {
     const scopes = cp.spawnSync(plan.executable, plan.args, { cwd: plan.cwd, encoding: 'utf8', timeout: 10000 });
     assert.equal(scopes.status, 0, scopes.stderr || String(scopes.error));
     assert.equal(scopes.stdout, '2\n3\n2\n1\n4\n1\n1\n');
-    console.log('PASS: CLI snippets checked by actual Ru; graphics snippets executed with GraphicsHost, CLI/check rejection verified; Unicode/space/metacharacter paths, argv, stdin, and explicit/natural procedure completion through real interpreter.');
+    console.log('PASS: CLI snippets checked by actual Ru; graphics snippets executed twice with GraphicsHost and compiled browser runtime, CLI/check rejection and pure-color CLI exception verified; Unicode/space/metacharacter paths, argv, stdin, and explicit/natural procedure completion through real interpreter.');
 } finally { fs.rmSync(temp, { recursive: true, force: true }); }

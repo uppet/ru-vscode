@@ -135,7 +135,16 @@ exports.run = async () => {
         const hidden = await vscode.commands.executeCommand('vscode.executeHoverProvider', newGraphicsDoc.uri, new vscode.Position(line,col));
         assert.equal(hidden.length,0,'ordinary name/string/comment has no new graphics hover');
     }
-    for (const name of ['文本整理','数学计算','随机种子','阵删弹查','典命名参数','如观绘图','如观动画交互','如观形状变换','透明颜色','如观透明文字','如观计时动画']) {
+    const pathGraphicsDoc = await vscode.workspace.openTextDocument({language:'ru', content:'图 其 弧 20 20 80 80 0 1.\n图 其 扇形 20 20 80 80 0 1.\n图 其 折线 [[0,0],[20,20]].\n图 其 贝塞尔 0 0 0 20 20 0 20 20.\n贝塞尔 取 1.\n“其 折线”.\n批. 其 扇形.'});
+    for (const [line, version] of [[0,'0.19.4'],[1,'0.19.4'],[2,'0.19.5'],[3,'0.19.6']]) {
+        const found = await vscode.commands.executeCommand('vscode.executeHoverProvider', pathGraphicsDoc.uri, new vscode.Position(line,4));
+        assert.ok(found.some(h => h.contents.some(c => c.value?.includes(version))), 'path member hover registered');
+    }
+    for (const [line,col] of [[4,0],[5,3],[6,6]]) {
+        const hidden = await vscode.commands.executeCommand('vscode.executeHoverProvider', pathGraphicsDoc.uri, new vscode.Position(line,col));
+        assert.equal(hidden.length,0,'ordinary name/string/comment has no path hover');
+    }
+    for (const name of ['文本整理','数学计算','随机种子','阵删弹查','典命名参数','如观绘图','如观动画交互','如观形状变换','透明颜色','如观透明文字','如观计时动画','如观弧与扇形','如观折线','如观贝塞尔']) {
         const doc=await vscode.workspace.openTextDocument({language:'ru',content:''});
         const ed=await vscode.window.showTextDocument(doc);
         ed.options = {insertSpaces:true,tabSize:4};

@@ -160,3 +160,43 @@ test('graphics color, text and clock help states exact versions and contracts', 
     assert.ok(hoverAt("外言 '如:观'.", 0).text.includes('#RRGGBB 或 #RRGGBBAA'));
     assert.ok(hoverAt('图 其 保存.', 4).text.includes('文字对齐'));
 });
+
+test('path members stay contextual across whitespace, Unicode, strings and comments', () => {
+    const versions = {弧:'0.19.4', 扇形:'0.19.4', 折线:'0.19.5', 贝塞尔:'0.19.6'};
+    for (const [word, version] of Object.entries(versions)) {
+        for (const gap of [' ', '\t', '\n']) {
+            const source = `图 其${gap}${word}.`;
+            const text = hoverAt(source, source.indexOf(word))?.text;
+            for (const phrase of [version, 'Python / browser-js', '普通 CLI／check', '不判断接收者类型', '返回空'])
+                assert.ok(text?.includes(phrase), `${word}: ${phrase}`);
+        }
+        for (const source of [word, `${word} 取 1.`, `其他 ${word}.`, `𠀀其 ${word}.`, `其 ${word}值.`, `其 ${word}².`, `其 2 ${word}.`, `其 '${word}'.`, `# 其 ${word}`, `// 其 ${word}`, `批. 其 ${word}`, `解. 其 ${word} 释.`, `其 '文字' ${word}.`, `其 # 注释\n${word}.`])
+            assert.equal(hoverAt(source, source.lastIndexOf(word)), undefined, source);
+        for (const [open, close] of [["'", "'"], ['"', '"'], ['‘', '’'], ['“', '”']]) {
+            const source = `${open}其 ${word}${close}`;
+            assert.equal(hoverAt(source, source.indexOf(word)), undefined, source);
+        }
+    }
+});
+
+test('path hover states exact signatures, open paths, sweep and control-point contracts', () => {
+    const expected = {
+        弧:['六参均必需', '横:', '纵:', '宽:', '高:', '始角:', '转角:', '不混用', '外接框左上角', '宽高非负', '100000', '弧度', '不是终止角', '顺时针', '逆时针', '参数角', '只描边', '忽略填色', '转角0', '>= 2π', '不取模归零'],
+        扇形:['六参均必需', '横:', '纵:', '宽:', '高:', '始角:', '转角:', '不混用', '弧度', '两条半径边', 'nonzero', '>= 2π', '无中心辐条', '转角0', '冻结'],
+        折线:['唯一参数必需', '点阵:', '2～256', '恰含两个', '100000', '只描边一次', '不自动首尾闭合', '忽略且不修改填色', '深复制', '描边 空', '帧预算不变'],
+        贝塞尔:['八参均必需', '起横:', '起纵:', '控一横:', '控一纵:', '控二横:', '控二纵:', '终横:', '终纵:', '不混用', '100000', '原生三次', '非必过点', '只描边一次', '不自动闭合', '忽略且不修改填色', '描边 空', '帧预算不变']
+    };
+    for (const [word, phrases] of Object.entries(expected)) {
+        const text = hoverAt(`图 其 ${word}.`, 4).text;
+        for (const phrase of phrases) assert.ok(text.includes(phrase), `${word}: ${phrase}`);
+    }
+    const snippets = require('../snippets/ru.json');
+    for (const name of ['如观弧与扇形', '如观折线', '如观贝塞尔']) {
+        const source = snippets[name].body.join('\n');
+        assert.match(source, /观 取 外言 '如:观'/);
+        assert.match(source, /图 取 观 其 画布/);
+        assert.match(snippets[name].description, /如书 Python \/ browser-js/);
+        assert.match(snippets[name].description, /CLI 不支持画布/);
+    }
+    for (const member of Object.keys(expected)) assert.ok(hoverAt('外言', 0).text.includes(member));
+});

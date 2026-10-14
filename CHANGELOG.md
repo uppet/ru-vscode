@@ -1,3 +1,10 @@
+## 0.8.2
+
+- 累计同步如观弧／扇形（Ru 0.19.4）、开放折线（0.19.5）与三次贝塞尔（0.19.6）：仅在 `其` 后高亮与悬停说明，不新增保留字。
+- 明确六参带符号弧度、部分／整圈扇形、点阵深复制、八参控制点与只描边语义，以及精确命名参数和宿主边界。
+- 新增三个可直接放入如书 Python／browser-js 运行的短片段：弧与扇形、折线快照、贝塞尔控制点。保留纯颜色在 Python CLI `run` 的例外。
+- 保留现有运行命令、信任限制、配置与语言能力，不增加运行时依赖；加入词法边界、真实解释器和 browser-js 运行时回归。
+
 ## 0.8.1 · 2026-10-14
 
 - Sync three small Ru graphics updates: alpha colors / 颜色 (Ru 0.19.1+), 文字对齐 (0.19.2+), and 经过秒 / 间隔秒 (0.19.3+), with contextual member highlighting and lexical hover only.

@@ -270,3 +270,19 @@ test('alpha, text alignment and timing are contextual names with Unicode boundar
     }
     for (const name of ['红', '绿', '蓝', '不透明度', '横向', '纵向', '基线']) has(`${name} 取 1.`, name, 'variable.other.ru');
 });
+
+test('arc, sector, polyline and bezier are ordinary contextual members', () => {
+    for (const word of ['弧', '扇形', '折线', '贝塞尔']) {
+        for (const gap of [' ', '\t']) has(`图 其${gap}${word}.`, word, 'support.function.member.ru');
+        for (const text of [word, `${word} 取 1.`, `其他 ${word}.`, `其 ${word}值.`, `其 ${word}².`, `𠀀其 ${word}.`, `其𠀀 ${word}.`])
+            has(text, word, 'variable.other.ru');
+        for (const line of [`# 其 ${word}.`, `// 其 ${word}.`, `批. 其 ${word}.`, `解. 其 ${word}. 释.`])
+            assert.ok(scopes(line, line.indexOf(word)).some(s => s.startsWith('comment.')));
+        for (const [open, close] of [["'", "'"], ['"', '"'], ['‘', '’'], ['“', '”']])
+            has(`${open}其 ${word}.${close}`, word, 'string.quoted.ru');
+    }
+    for (const name of ['始角','转角','点阵','起横','起纵','控一横','控一纵','控二横','控二纵','终横','终纵']) {
+        has(`${name} 取 1.`, name, 'variable.other.ru');
+        has(`图 其 贝塞尔 ${name}:1.`, name, 'variable.other.ru');
+    }
+});

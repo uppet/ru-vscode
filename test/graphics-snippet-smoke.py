@@ -62,6 +62,43 @@ try:
             assert not host.canvas.stack
             assert tuple(host.canvas.transform) == (1, 0, 0, 1, 0, 0)
             assert not host.canvas.clips
+        elif name == '如观弧与扇形':
+            commands = events[-1]['commands']
+            assert [c['op'] for c in commands] == ['background', 'sector', 'arc']
+            sector, arc = commands[1:]
+            assert (sector['x'], sector['y'], sector['width'], sector['height']) == (20, 30, 120, 120)
+            assert (sector['start'], sector['sweep']) == (-math.pi / 2, math.pi / 2)
+            assert sector['fill'] == '#ffb34780'
+            assert (arc['x'], arc['y'], arc['width'], arc['height']) == (200, 30, 120, 120)
+            assert (arc['start'], arc['sweep']) == (0, -math.pi * 1.5)
+            assert arc['fill'] == ''
+            for command in (sector, arc):
+                assert command['stroke'] == '#25344a' and command['stroke_width'] == 4
+                assert command.get('transform', [1, 0, 0, 1, 0, 0]) == [1, 0, 0, 1, 0, 0] and command.get('clips', []) == []
+            assert host.canvas.fill == '#ffb34780'
+        elif name == '如观折线':
+            commands = events[-1]['commands']
+            assert [c['op'] for c in commands] == ['background', 'polyline', 'polyline', 'rect']
+            original, changed, rect = commands[1:]
+            assert original['points'] == [[20,130],[100,40],[200,110],[300,50]]
+            assert changed['points'] == [[20,130],[100,80],[200,110],[300,50]]
+            assert original['stroke'] == '#4677ff80' and changed['stroke'] == '#25865d'
+            assert original['fill'] == changed['fill'] == ''
+            assert original['stroke_width'] == changed['stroke_width'] == 4
+            assert rect['fill'] == host.canvas.fill == '#ffb34780'
+        elif name == '如观贝塞尔':
+            commands = events[-1]['commands']
+            assert [c['op'] for c in commands] == ['background', 'polyline', 'bezier', 'bezier']
+            guide, upper, lower = commands[1:]
+            assert guide['points'] == [[20,140],[80,20],[240,20],[300,140]]
+            assert guide['stroke'] == '#a0a8b880' and guide['stroke_width'] == 2
+            keys = ('x1','y1','cx1','cy1','cx2','cy2','x2','y2')
+            assert [upper[k] for k in keys] == [20,140,80,20,240,20,300,140]
+            assert [lower[k] for k in keys] == [20,140,80,200,240,200,300,140]
+            assert upper['stroke'] == '#4677ff' and lower['stroke'] == '#25865d'
+            assert upper['fill'] == lower['fill'] == ''
+            assert upper['stroke_width'] == lower['stroke_width'] == 4
+            assert host.canvas.fill == '#ffb34780'
         elif name == '如观透明文字':
             commands = events[-1]['commands']
             assert [c['op'] for c in commands] == ['background', 'rect', 'text', 'text']
