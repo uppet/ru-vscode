@@ -1,3 +1,13 @@
+## 0.8.3 immutable-cache editor help · 2026-10-14
+
+- Independent checkout based on local `92791a68896258046c7b09af93bd1053c495fe91` (equivalent published main `3a68149582bb94bc4bd44b153d7ea91c8da8e33a`). Existing command implementation and post-exit Problems integration order are preserved.
+- Cross-checked Ru 0.19.8 / 如书 0.8.8 candidate `09c87909325e348fb61dc14363a16472164cd427`: `docs/ruguan-guide.md`, actual Python cache signatures, read-only dimensions and resource event shape. No language files modified.
+- `npm run lint` passed; `npm test` passed all 63 tests, including real TextMate/Oniguruma contextual cache/dimension highlighting, Unicode boundaries, all quote pairs, comments, exact hover contracts and the new snippet's source/description. Existing launch, trust, diagnostic and grammar tests remain passing.
+- `node --check test/integration.cjs`, `node --check test/browser-snippet-smoke.mjs`, Python AST parsing of `test/graphics-snippet-smoke.py`, and `git diff --check` passed.
+- `RU_LANGUAGE_ROOT=/workspace/shared/ru-graphics-image-cache npm run test:ru` passed against frozen language commit `09c87909325e348fb61dc14363a16472164cd427`, tree `b5c45287ea25e1e5348260440b2b03ff53250848`. All 44 snippets were checked; 9 canvas snippets executed twice with actual Python GraphicsHost, and 10 graphics/color snippets compiled and executed twice with browser runtime under Node. New cache assertions verified repeated execution, one resource referenced twice, read-only dimensions, alpha fill and transformed placement. Existing CLI/check rejection, pure-color CLI exception, stdin, argv, paths and language regressions passed. There were no failures or test fixes, and both repositories remained clean. This validates browser-runtime behavior, not browser UI or rendered pixels.
+- Actual Electron integration, real browser/canvas QA and remote CI have not been run by this task. No new Windows/macOS or remote-host UI coverage is claimed. The existing diagnostic integration fix is unchanged; new extension-host assertions cover cache hover registration/suppression and snippet insertion.
+- No workflow, dependency, command, configuration, privacy, license or publication changes. VSIX packaging and archive identity are reported with the frozen artifact.
+
 ## CI task diagnostic regression · 2026-10-14
 
 - Investigated public CI run `38515022759`, attempt 2, job `115701319206`, commit `17cb5d314fc3665b2534af2053f086efbd0f6946`: npm install, lint and 60 unit tests passed; real VS Code 1.90.2 started the task but timed out waiting for Problems before the test supplied stdin.

@@ -1,3 +1,9 @@
+## 0.8.3
+
+- Add contextual ordinary-member highlighting and hover help for immutable cache creation, image placement and read-only dimensions (Ru 0.19.8 / 如书 0.8.8).
+- Add `ruguan-cache` / `如观缓存`, with initialization-only recording, named and positional image placement, read-only dimensions and restored transforms.
+- Document lifecycle, quotas and unchanged CLI boundary; keep commands, diagnostics and the integration task-marker timing correction unchanged.
+
 ## Unreleased
 
 - 修复 VS Code integration 测试等待 Problems 后才发送 stdin 的循环等待：保留交互输入与完整行定位断言，在普通任务退出后等待诊断发布。

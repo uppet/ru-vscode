@@ -33,6 +33,19 @@ for (let repeat = 0; repeat < 2; repeat++) {
         send(106, 'key_down', {key:'Space'});
         send(106.25, 'frame'); check(6.25, 80);
         send(111.25, 'frame'); check(11.25, 100);
+    } else if (name === '如观不可变缓存') {
+        const event = scene();
+        assert.deepEqual(event.commands.map(c => c.op), ['background','image','image']);
+        const [first, second] = event.commands.slice(1);
+        assert.deepEqual([first.x,first.y,second.x,second.y], [20,20,0,0]);
+        assert.equal(first.resource, second.resource);
+        assert.equal(event.resources.length, 1);
+        const resource = event.resources[0];
+        assert.deepEqual([resource.width,resource.height], [80,60]);
+        assert.equal(resource.commands[0].op, 'rect');
+        assert.equal(resource.commands[0].fill, '#4677ff80');
+        const expected = [Math.cos(0.3),Math.sin(0.3),-Math.sin(0.3),Math.cos(0.3),180,80];
+        second.transform.forEach((value, i) => assert.ok(Math.abs(value - expected[i]) < 1e-12));
     } else if (name === '如观形状变换') {
         const c = scene().commands;
         assert.deepEqual(c.map(c => c.op), ['background','polygon','polygon']);

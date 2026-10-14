@@ -149,7 +149,16 @@ exports.run = async () => {
         const hidden = await vscode.commands.executeCommand('vscode.executeHoverProvider', pathGraphicsDoc.uri, new vscode.Position(line,col));
         assert.equal(hidden.length,0,'ordinary name/string/comment has no path hover');
     }
-    for (const name of ['文本整理','数学计算','随机种子','阵删弹查','典命名参数','如观绘图','如观动画交互','如观形状变换','透明颜色','如观透明文字','如观计时动画','如观弧与扇形','如观折线','如观贝塞尔']) {
+    const cacheDoc = await vscode.workspace.openTextDocument({language:'ru', content:'图 其 缓存.\n图 其 贴图.\n底图 其 宽.\n底图 其 高.\n缓存 取 1.\n“其 贴图”.\n批. 其 宽.'});
+    for (const [line, character] of [[0,4],[1,4],[2,5],[3,5]]) {
+        const found = await vscode.commands.executeCommand('vscode.executeHoverProvider', cacheDoc.uri, new vscode.Position(line,character));
+        assert.ok(found.some(h => h.contents.some(c => c.value?.includes('Ru 0.19.8／如书 0.8.8'))), 'cache member hover registered');
+    }
+    for (const [line, character] of [[4,0],[5,3],[6,6]]) {
+        const hidden = await vscode.commands.executeCommand('vscode.executeHoverProvider', cacheDoc.uri, new vscode.Position(line,character));
+        assert.ok(!hidden.some(h => h.contents.some(c => c.value?.includes('Ru 0.19.8／如书 0.8.8'))), 'cache hover suppressed');
+    }
+    for (const name of ['文本整理','数学计算','随机种子','阵删弹查','典命名参数','如观绘图','如观动画交互','如观形状变换','透明颜色','如观透明文字','如观计时动画','如观弧与扇形','如观折线','如观贝塞尔','如观不可变缓存']) {
         const doc=await vscode.workspace.openTextDocument({language:'ru',content:''});
         const ed=await vscode.window.showTextDocument(doc);
         ed.options = {insertSpaces:true,tabSize:4};

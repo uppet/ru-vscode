@@ -286,3 +286,19 @@ test('arc, sector, polyline and bezier are ordinary contextual members', () => {
         has(`图 其 贝塞尔 ${name}:1.`, name, 'variable.other.ru');
     }
 });
+
+test('cache and read-only dimensions are ordinary contextual members', () => {
+    for (const word of ['缓存', '贴图', '宽', '高']) {
+        for (const gap of [' ', '\t']) has(`图 其${gap}${word}.`, word, 'support.function.member.ru');
+        for (const text of [word, `${word} 取 1.`, `其他 ${word}.`, `其 ${word}值.`, `其 ${word}².`, `𠀀其 ${word}.`, `其𠀀 ${word}.`])
+            has(text, word, 'variable.other.ru');
+        for (const line of [`# 其 ${word}.`, `// 其 ${word}.`, `批. 其 ${word}.`, `解. 其 ${word}. 释.`])
+            assert.ok(scopes(line, line.indexOf(word)).some(s => s.startsWith('comment.')));
+        for (const [open, close] of [["'", "'"], ['"', '"'], ['‘', '’'], ['“', '”']])
+            has(`${open}其 ${word}.${close}`, word, 'string.quoted.ru');
+    }
+    for (const name of ['宽','高','绘制','图像','横','纵']) {
+        has(`${name} 取 1.`, name, 'variable.other.ru');
+        has(`图 其 缓存 ${name}:1.`, name, 'variable.other.ru');
+    }
+});

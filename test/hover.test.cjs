@@ -200,3 +200,40 @@ test('path hover states exact signatures, open paths, sweep and control-point co
     }
     for (const member of Object.keys(expected)) assert.ok(hoverAt('外言', 0).text.includes(member));
 });
+
+test('cache members stay contextual across whitespace, Unicode, strings and comments', () => {
+    const versions = {缓存:'0.19.8', 贴图:'0.19.8', 宽:'0.19.8', 高:'0.19.8'};
+    for (const [word, version] of Object.entries(versions)) {
+        for (const gap of [' ', '\t', '\n']) {
+            const source = `图 其${gap}${word}.`;
+            const text = hoverAt(source, source.indexOf(word))?.text;
+            for (const phrase of [version, 'Python / browser-js', '普通 CLI／check', '不判断接收者类型'])
+                assert.ok(text?.includes(phrase), `${word}: ${phrase}`);
+        }
+        for (const source of [word, `${word} 取 1.`, `其他 ${word}.`, `𠀀其 ${word}.`, `其 ${word}值.`, `其 ${word}².`, `其 2 ${word}.`, `其 '${word}'.`, `# 其 ${word}`, `// 其 ${word}`, `批. 其 ${word}`, `解. 其 ${word} 释.`, `其 '文字' ${word}.`, `其 # 注释\n${word}.`])
+            assert.equal(hoverAt(source, source.lastIndexOf(word)), undefined, source);
+        for (const [open, close] of [["'", "'"], ['"', '"'], ['‘', '’'], ['“', '”']]) {
+            const source = `${open}其 ${word}${close}`;
+            assert.equal(hoverAt(source, source.indexOf(word)), undefined, source);
+        }
+    }
+});
+
+test('cache help states immutable signatures, lifecycle and limits', () => {
+    const expected = {
+        缓存:['缓存 宽 高 绘制','宽:','高:','绘制:','三参均必需','不混用','返回不可变图像','只读','1～2048','初始化','一个临时绘图目标','都失效','每帧／输入回调','8张','4,194,304','128 KiB','2047','2048','逐帧传输','不承诺60fps'],
+        贴图:['贴图 图像 横 纵','图像:','横:','纵:','三参均必需','不混用','返回空','1:1','变换／裁剪','source-over','不重新着色','100000','停／继续','旧图像宽高仍可读'],
+        宽:['只读','不可赋值','无参不写括号','失效后宽高仍可读'],
+        高:['只读','不可赋值','无参不写括号','失效后宽高仍可读']
+    };
+    for (const [word, phrases] of Object.entries(expected)) {
+        const text = hoverAt(`图 其 ${word}.`, 4).text;
+        for (const phrase of phrases) assert.ok(text.includes(phrase), `${word}: ${phrase}`);
+    }
+    for (const word of ['绘制','图像','横','纵']) assert.equal(hoverAt(`${word} 取 1.`, 0), undefined);
+    const snippet = require('../snippets/ru.json')['如观不可变缓存'];
+    assert.deepEqual(snippet.prefix, ['ruguan-cache','如观缓存']);
+    for (const term of ['0.19.8','0.8.8','Python / browser-js','CLI 不支持画布']) assert.ok(snippet.description.includes(term));
+    const source = snippet.body.join('\n');
+    for (const term of ['缓存 宽:80 高:60 绘制:(作 层:', '底图 其 宽', '底图 其 高', '贴图 图像:底图 横:20 纵:20', '贴图 底图 0 0', '图 其 恢复.']) assert.ok(source.includes(term));
+});

@@ -46,6 +46,24 @@ try:
             assert [c['op'] for c in events[-1]['commands']] == ['background', 'ellipse']
             host.handle({'type': 'mouse_down', 'x': 12, 'y': 13, 'button': 0})
             assert not host.snapshot()['running']
+        elif name == '如观不可变缓存':
+            event = events[-1]
+            assert [c['op'] for c in event['commands']] == ['background', 'image', 'image']
+            first, second = event['commands'][1:]
+            assert (first['x'], first['y']) == (20, 20)
+            assert (second['x'], second['y']) == (0, 0)
+            assert first['resource'] == second['resource']
+            assert len(event['resources']) == 1
+            resource = event['resources'][0]
+            assert (resource['width'], resource['height']) == (80, 60)
+            assert resource['commands'][0]['op'] == 'rect'
+            assert resource['commands'][0]['fill'] == '#4677ff80'
+            expected = [math.cos(0.3), math.sin(0.3), -math.sin(0.3), math.cos(0.3), 180, 80]
+            assert all(math.isclose(a, b) for a, b in zip(second['transform'], expected))
+            assert interpreter.global_scope.values['底宽'] == 80
+            assert interpreter.global_scope.values['底高'] == 60
+            assert not host.canvas.stack
+            assert tuple(host.canvas.transform) == (1, 0, 0, 1, 0, 0)
         elif name == '如观形状变换':
             commands = events[-1]['commands']
             assert [c['op'] for c in commands] == ['background', 'polygon', 'polygon']
