@@ -1,3 +1,16 @@
+## 未发布：全量导入语法迁移
+
+- 同步 Ru 0.20.0 开发版的完整关键词 `尽取`，保留 `外言`；旧 `尽 取` 停用的悬停迁移提示、Unicode 名称边界和竞赛／全量导入片段同步。
+- 单字 `尽` 继续保留用于迁移诊断，不新增 `进取` 或 `言` 别名；旧版本记录保留当时事实。
+
+## 0.8.4
+
+- Add a separate one-shot native-run command for Ru 0.20.0 如:密 and bundled third-party 如见, without a shortcut or persistent permission setting. Ordinary Run stays unchanged.
+- Ask modal consent before saving or launching, name the exact file and account-level native risk, reject untitled/virtual targets, and revalidate document identity, version, active editor and trust after consent/save/async preparation.
+- Share pending/live-task guards across both commands; put `--allow-native` before the filename and preserve Python/program argument separation.
+- Add exact-import module hover and two non-GUI snippets, keeping exports ordinary names. Isolate native snippet verification from regular C-target smoke; Windows native execution requires an explicit test opt-in.
+- Preserve the existing problem matcher and post-task-exit integration diagnostic assertions.
+
 ## 0.8.3
 
 - Add contextual ordinary-member highlighting and hover help for immutable cache creation, image placement and read-only dimensions (Ru 0.19.8 / 如书 0.8.8).

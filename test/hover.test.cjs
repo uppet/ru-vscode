@@ -77,7 +77,7 @@ test('dictionary named parameters and array value parameters stay distinct', () 
 });
 
 test('module import hover explains canonical names and notebook-only graphics', () => {
-    const help = hoverAt("尽 取 外言 '如:观'.", 4).text;
+    const help = hoverAt("尽取 外言 '如:观'.", 3).text;
     for (const word of ['如竞、如观、如:竞赛', "外言 '如:竞'", "外言 '如:观'", '如书 Python', '普通 CLI', 'C / Node.js', 'browser-js', '无兼容别名']) assert.ok(help.includes(word), word);
     for (const text of ["'外言'", '# 外言', '外言者']) assert.equal(hoverAt(text, text.indexOf('外言')), undefined);
     const snippets = require('../snippets/ru.json');
@@ -236,4 +236,42 @@ test('cache help states immutable signatures, lifecycle and limits', () => {
     for (const term of ['0.19.8','0.8.8','Python / browser-js','CLI 不支持画布']) assert.ok(snippet.description.includes(term));
     const source = snippet.body.join('\n');
     for (const term of ['缓存 宽:80 高:60 绘制:(作 层:', '底图 其 宽', '底图 其 高', '贴图 图像:底图 横:20 纵:20', '贴图 底图 0 0', '图 其 恢复.']) assert.ok(source.includes(term));
+});
+
+
+test('native module help uses exact import literals and preserves ordinary names and strings', () => {
+    for (const name of ['如:密', '如见']) {
+        for (const [open, close] of [["'", "'"], ['"', '"'], ['‘', '’'], ['“', '”']]) {
+            const source = `模块 取 外言 ${open}${name}${close}.`;
+            const result = hoverAt(source, source.indexOf(name));
+            for (const term of ['0.20.0', 'Windows x64', 'Python', '--allow-native', '如书', '崩溃', '沙箱'])
+                assert.ok(result?.text.includes(term), `${name}: ${term}`);
+            assert.equal(source.slice(result.start, result.end), name);
+        }
+        for (const source of [`'${name}'`, `# 外言 '${name}'`, `批. 外言 '${name}'`, `解. 外言 '${name}' 释.`,
+            `外言者 '${name}'`, `外言 2 '${name}'`, `外言 '${name}其他'`, `外言 '${name}`, `外言 # 注释\n'${name}'`])
+            assert.equal(hoverAt(source, source.indexOf(name)), undefined, source);
+    }
+    for (const word of ['如见', '密', 'u64', 'UTF16', '解UTF16', '窗口', 'Win32'])
+        assert.equal(hoverAt(`${word} 取 1.`, 0), undefined, word);
+    for (const term of ['如:密', '如见', 'Windows x64', '普通名称', '文件名前'])
+        assert.ok(hoverAt('外言', 0).text.includes(term), term);
+    const snippets = require('../snippets/ru.json');
+    assert.ok(snippets['原生机器值'].body.join('\n').includes("'18446744073709551615'"));
+    assert.ok(snippets['原生机器值'].body.includes('文 其 关闭.'));
+    assert.ok(snippets['如见绑定概览'].body.includes('显 (见 其 Win32 其 WNDCLASSEXW) 其 大小.'));
+    assert.ok(snippets['如见绑定概览'].description.includes('不创建窗口'));
+});
+
+test('canonical import-all and retired spelling have explicit whole-token migration help', () => {
+    const canonical=hoverAt("尽取 外言 '如:数学'.",0).text;
+    for(const term of ['尽取须连写','模块顶层','静态解析','名称冲突','旧 尽 取 已停用']) assert.ok(canonical.includes(term),term);
+    assert.ok(hoverAt("尽 取 外言 '如:数学'.",0).text.includes('请改用 尽取 外言'));
+    for(const source of ['尽取值','尽取器','未尽取','𠀀尽取','尽取²','α尽取','_尽取',"'尽取'",'批. 尽取','解. 尽取 释.','进取','言']) {
+        const offset=source.indexOf('尽取');
+        assert.equal(hoverAt(source,offset<0?0:offset),undefined,source);
+    }
+    const snippets=require('../snippets/ru.json');
+    assert.ok(snippets['全量导入'].body[0].startsWith('尽取 外言 '));
+    assert.ok(snippets['竞赛模板'].body[0].startsWith('尽取 外言 '));
 });

@@ -302,3 +302,22 @@ test('cache and read-only dimensions are ordinary contextual members', () => {
         has(`图 其 缓存 ${name}:1.`, name, 'variable.other.ru');
     }
 });
+
+
+test('native module exports and bundled third-party names remain ordinary identifiers', () => {
+    for (const word of ['密','如见','Win32','u64','UTF16','解UTF16','WNDCLASSEXW','窗口','系统库','动态库']) {
+        has(`${word} 取 1.`, word, 'variable.other.ru');
+        has(`外言 '${word}'.`, word, 'string.quoted.ru');
+    }
+    has("密 取 外言 '如:密'.", '如:密', 'string.quoted.ru');
+});
+
+test('canonical import-all and legacy keyword keep exact Unicode name boundaries', () => {
+    has("尽取 外言 '如:数学'.",'尽取','keyword.control.ru');
+    has("尽 取 外言 '如:数学'.",'尽','keyword.control.ru');
+    for(const name of ['尽取值','尽取器','未尽取','𠀀尽取','尽取²','α尽取','_尽取','进取','言'])
+        has(name,name,'variable.other.ru');
+    has("'尽取'",'尽取','string.quoted.ru');
+    has('批. 尽取','尽取','comment.line.ru');
+    has('解. 尽取 释.','尽取','comment.block.ru');
+});

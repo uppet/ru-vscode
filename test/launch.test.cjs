@@ -39,3 +39,19 @@ test('VS Code task-variable syntax cannot expand filenames or literal arguments'
         assert.throws(() => buildLaunchPlan({ ...base, ...override }, '/tmp/a.ru', undefined, 'linux'), /task-variable/);
     }
 });
+
+
+test('native capability is explicit per invocation and precedes filename on every platform', () => {
+    for (const [platform, file] of [['linux', '/tmp/原生 空格.ru'], ['win32', 'C:\\题目\\原生 空格.ru']]) {
+        for (const cliPath of ['', platform === 'win32' ? 'C:\\工具\\ru' : '/tool/ru']) {
+            const settings = { ...base, cliPath, interpreterArguments: ['-u', '-X', 'utf8'], programArguments: ['--allow-native', 'a b'] };
+            const ordinary = buildLaunchPlan(settings, file, undefined, platform);
+            const native = buildLaunchPlan(settings, file, undefined, platform, { allowNative: true });
+            const index = native.args.indexOf('run');
+            assert.deepEqual(native.args.slice(index), ['run', '--allow-native', file, '--', '--allow-native', 'a b']);
+            assert.deepEqual(ordinary.args.slice(index), ['run', file, '--', '--allow-native', 'a b']);
+            assert.deepEqual(native.args.slice(0, index), ordinary.args.slice(0, index));
+            assert.deepEqual(buildLaunchPlan(settings, file, undefined, platform, { allowNative: false }), ordinary);
+        }
+    }
+});

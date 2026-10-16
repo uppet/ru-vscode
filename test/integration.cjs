@@ -28,7 +28,22 @@ exports.run = async () => {
     await vscode.window.showTextDocument(document);
     const extension = vscode.extensions.getExtension('uppet.ru-vscode');
     assert.ok(extension); await extension.activate();
-    assert.ok((await vscode.commands.getCommands()).includes('ru.runFile'));
+    const commands = await vscode.commands.getCommands();
+    assert.ok(commands.includes('ru.runFile'));
+    assert.ok(commands.includes('ru.runFileNative'));
+    const nativeHelp = await vscode.workspace.openTextDocument({ language: 'ru', content: "密 取 外言 '如:密'.\n见 取 外言 '如见'.\nu64 取 1." });
+    for (const line of [0, 1]) {
+        const hovers = await vscode.commands.executeCommand('vscode.executeHoverProvider', nativeHelp.uri, new vscode.Position(line, 8));
+        assert.ok(hovers.some(h => h.contents.some(c => c.value?.includes('Windows x64') && c.value.includes('--allow-native'))), 'native import help registered');
+    }
+    assert.equal((await vscode.commands.executeCommand('vscode.executeHoverProvider', nativeHelp.uri, new vscode.Position(2, 0))).length, 0);
+    for (const name of ['原生机器值', '如见绑定概览']) {
+        const doc = await vscode.workspace.openTextDocument({ language: 'ru', content: '' });
+        const ed = await vscode.window.showTextDocument(doc);
+        const body = require('../snippets/ru.json')[name].body.join('\n');
+        await ed.insertSnippet(new vscode.SnippetString(body));
+        assert.equal(doc.getText(), body.replaceAll('$0', ''), `${name}: insertion only, never execute native code`);
+    }
     const helpDocument = await vscode.workspace.openTextDocument({ language: 'ru', content: '值 取 1.\n显 值.' });
     const editor = await vscode.window.showTextDocument(helpDocument);
     const hovers = await vscode.commands.executeCommand('vscode.executeHoverProvider', helpDocument.uri, new vscode.Position(0, 2));

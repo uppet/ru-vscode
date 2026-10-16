@@ -21,6 +21,16 @@ try {
         if (name === '过程提前结束') source = `作 提前结束:\n${source}\n为\n`;
         const file = path.join(temp, `${name}.ru`);
         fs.writeFileSync(file, source);
+        if (name === '原生机器值' || name === '如见绑定概览') {
+            // Never send native snippets through C-target check or an ordinary execution loop.
+            // The isolated helper parses both, verifies default denial and platform denial,
+            // and requires RU_NATIVE_SNIPPET_TESTS=1 before Windows native execution.
+            const native = cp.spawnSync(interpreterPath, [path.join(__dirname, 'native-snippet-smoke.py'), path.resolve(root), file, name],
+                { encoding: 'utf8', timeout: 10000 });
+            assert.equal(native.status, 0, `${name}: ${native.stderr || native.error}`);
+            process.stdout.write(native.stdout);
+            continue;
+        }
         const result = cp.spawnSync(interpreterPath, [cli, 'check', file], { encoding: 'utf8', timeout: 10000 });
         if (name.startsWith('如观')) {
             assert.notEqual(result.status, 0, 'CLI check must report notebook-only graphics');

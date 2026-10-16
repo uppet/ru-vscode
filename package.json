@@ -2,7 +2,7 @@
   "name": "ru-vscode",
   "displayName": "如言 · Ru",
   "description": "如言 language support: syntax highlighting, snippets, and interactive Run Current File.",
-  "version": "0.8.3",
+  "version": "0.8.4",
   "publisher": "uppet",
   "license": "UNLICENSED",
   "private": true,
@@ -79,6 +79,11 @@
         "command": "ru.runFile",
         "title": "如言: 运行当前文件 (Run Current File)",
         "icon": "$(play)",
+        "enablement": "editorLangId == ru && isWorkspaceTrusted"
+      },
+      {
+        "command": "ru.runFileNative",
+        "title": "如言: 原生运行当前文件（需确认）",
         "enablement": "editorLangId == ru && isWorkspaceTrusted"
       }
     ],
@@ -178,7 +183,7 @@
     "test": "npm run compile && node --test test/*.test.cjs",
     "test:integration": "npm run compile && node test/run-integration.cjs",
     "vscode:prepublish": "npm run compile",
-    "package": "vsce package --no-dependencies --out ru-vscode-0.8.3.vsix",
+    "package": "vsce package --no-dependencies --out ru-vscode-0.8.4.vsix",
     "check": "npm run lint && npm test && npm run package",
     "test:ru": "npm run compile && node test/real-ru-smoke.cjs"
   },

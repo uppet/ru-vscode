@@ -7,6 +7,8 @@ export interface RunSettings {
     workingDirectory: string;
     programArguments: string[];
 }
+/** Per-invocation capability; never loaded from workspace settings. */
+export interface RunOptions { allowNative?: boolean }
 export interface LaunchPlan { executable: string; args: string[]; cwd: string; cliPath?: string }
 
 function stringValue(value: unknown, name: string): asserts value is string {
@@ -21,7 +23,7 @@ function stringArray(value: unknown, name: string): asserts value is string[] {
 
 /** Build argv, never a shell command. Only path settings expand our two documented variables. */
 export function buildLaunchPlan(settings: RunSettings, file: string, workspace: string | undefined,
-    platform: NodeJS.Platform = process.platform): LaunchPlan {
+    platform: NodeJS.Platform = process.platform, options: RunOptions = {}): LaunchPlan {
     const paths = platform === 'win32' ? path.win32 : path.posix;
     stringValue(file, 'File path');
     if (!paths.isAbsolute(file)) { throw new Error('The source file must have an absolute path.'); }
@@ -48,7 +50,7 @@ export function buildLaunchPlan(settings: RunSettings, file: string, workspace: 
     const cliPath = rawCli ? paths.resolve(workspace || fileDir, rawCli) : undefined;
     const cwd = paths.resolve(workspace || fileDir, expand(settings.workingDirectory, 'ru.workingDirectory') || fileDir);
     const args = [...settings.interpreterArguments, ...(cliPath ? [cliPath] : ['-m', 'rulang']),
-        'run', file, ...(settings.programArguments.length ? ['--', ...settings.programArguments] : [])];
+        'run', ...(options.allowNative === true ? ['--allow-native'] : []), file, ...(settings.programArguments.length ? ['--', ...settings.programArguments] : [])];
     // VS Code resolves task variables even for ProcessExecution. Reject residual syntax
     // rather than let filenames or supposedly literal arguments invoke ${command:...}.
     if ([executable, ...args, cwd].some(value => value.includes('${'))) {
