@@ -112,7 +112,7 @@ exports.run = async () => {
     assert.equal(scopeDoc.getText(), '段:\n    \n落.', 'scope paired Enter');
     const scopeHovers = await vscode.commands.executeCommand('vscode.executeHoverProvider', scopeDoc.uri, new vscode.Position(0,0));
     assert.ok(scopeHovers.some(h=>h.contents.some(c=>c.value?.includes('直接取只写当前块'))), 'scope hover registered');
-    for (const [name, expected] of [['作用域段','段:\n    值 取 1.\n    显 值.\n落.\n'], ['符号作用域块','{\n    值 取 1.\n    显 值.\n}\n'], ['符号赋值','值 := 1.\n']]) {
+    for (const [name, expected] of [['作用域段','段:\n    值 取 1.\n    显 值.\n落.\n'], ['符号作用域块','{\n    值 取 1.\n    显 值.\n}.\n'], ['符号赋值','值 := 1.\n']]) {
         const doc = await vscode.workspace.openTextDocument({language:'ru',content:''});
         const ed = await vscode.window.showTextDocument(doc);
         ed.options = {insertSpaces:true,tabSize:4};

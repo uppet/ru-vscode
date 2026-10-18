@@ -2,7 +2,7 @@
   "name": "ru-vscode",
   "displayName": "如言 · Ru",
   "description": "如言 language support: syntax highlighting, snippets, and interactive Run Current File.",
-  "version": "0.8.4",
+  "version": "0.8.5",
   "publisher": "uppet",
   "license": "UNLICENSED",
   "private": true,
@@ -163,16 +163,17 @@
     "problemMatchers": [
       {
         "name": "ru",
-        "label": "如言：运行 / 编译错误（行定位）",
+        "label": "如言：运行 / 编译诊断（行定位）",
         "owner": "ru",
         "source": "如言",
         "fileLocation": "absolute",
         "severity": "error",
         "pattern": {
-          "regexp": "^(?!rushu://|<)(.+?):([1-9][0-9]*)(?::[1-9][0-9]*)?: (?:error: )?(.+)$",
+          "regexp": "^(?!rushu://|<)(.+?):([1-9][0-9]*)(?::[1-9][0-9]*)?: (?:(error|warning): )?(.+)$",
           "file": 1,
           "line": 2,
-          "message": 3
+          "message": 4,
+          "severity": 3
         }
       }
     ]
@@ -183,7 +184,7 @@
     "test": "npm run compile && node --test test/*.test.cjs",
     "test:integration": "npm run compile && node test/run-integration.cjs",
     "vscode:prepublish": "npm run compile",
-    "package": "vsce package --no-dependencies --out ru-vscode-0.8.4.vsix",
+    "package": "vsce package --no-dependencies --out ru-vscode-0.8.5.vsix",
     "check": "npm run lint && npm test && npm run package",
     "test:ru": "npm run compile && node test/real-ru-smoke.cjs"
   },

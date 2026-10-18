@@ -275,3 +275,7 @@ test('canonical import-all and retired spelling have explicit whole-token migrat
     assert.ok(snippets['全量导入'].body[0].startsWith('尽取 外言 '));
     assert.ok(snippets['竞赛模板'].body[0].startsWith('尽取 外言 '));
 });
+
+test('scope help shows the complete statement period', () => {
+    assert.ok(hoverAt('段:', 0).text.includes('{ … }.'));
+});

@@ -18,7 +18,7 @@ try {
         if (name === '典字面量' || name === '空典' || name === '符号典' || name === '符号空典') source = `表 取 ${source.trim()}.\n`;
         if (name === '典逐目回调') source = `表 取 典: ‘上’ 对 0. 成.\n${source}`;
         if (name.startsWith('匿名')) source = `回调 取 ${source.trim()}.\n`;
-        if (name === '过程提前结束') source = `作 提前结束:\n${source}\n为\n`;
+        if (name === '过程提前结束') source = `作 提前结束:\n${source}\n为.\n`;
         const file = path.join(temp, `${name}.ru`);
         fs.writeFileSync(file, source);
         if (name === '原生机器值' || name === '如见绑定概览') {

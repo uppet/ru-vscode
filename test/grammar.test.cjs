@@ -321,3 +321,43 @@ test('canonical import-all and legacy keyword keep exact Unicode name boundaries
     has('批. 尽取','尽取','comment.line.ru');
     has('解. 尽取 释.','尽取','comment.block.ru');
 });
+
+test('statement snippets use terminal periods while expression snippets stay composable', () => {
+    const snippets = require('../snippets/ru.json');
+    const endings = {
+        '算定义': '法.', '作定义': '为.', '条件': '然.', '计次循环': '环.',
+        '恢复': '终.', '形定义': '象.', '入口': '法.', '算定义省略类型': '法.',
+        '作定义省略类型': '为.', '混合参数定义': '法.', '事实参数': '法.',
+        '作用域段': '落.', '符号作用域块': '}.',
+    };
+    for (const [name, ending] of Object.entries(endings)) assert.equal(snippets[name].body.at(-2), ending, name);
+    for (const name of ['匿名算', '匿名算省略类型']) assert.equal(snippets[name].body.at(-1), '法$0', name);
+    for (const name of ['匿名作', '匿名作省略类型']) assert.equal(snippets[name].body.at(-1), '为$0', name);
+    assert.equal(snippets['典字面量'].body.at(-1), '成$0');
+    assert.equal(snippets['空典'].body.at(-1), '典: 成$0');
+    assert.equal(snippets['符号典'].body.at(-1), '}$0');
+    assert.equal(snippets['符号空典'].body.at(-1), '{}$0');
+    assert.ok(snippets['阵排序另成'].body.includes('    法.'));
+    assert.ok(snippets['阵排序另成'].body.includes('象.'));
+    assert.ok(snippets['阵逐位回调'].body.includes('    若 位 == 0 则 完. 然.'));
+    assert.equal(snippets['形定义'].body[0], '形 ${1:点}:');
+    assert.equal(snippets['恢复'].body[0], '试:');
+    assert.equal(snippets['恢复'].body[2], '救 ${2:原因}:');
+    // A callback expression ends before the call's period, never with an extra inner period.
+    for (const name of ['如观动画交互', '阵排序另成']) {
+        assert.ok(!snippets[name].body.some(line => /(?:法|为)\.[)）]/u.test(line)), name);
+    }
+});
+
+test('statement-ending dots preserve old and new highlighting and indentation', () => {
+    for (const suffix of ['', '.', '。']) {
+        for (const word of ['法', '然', '环', '象']) has(word + suffix, word, 'keyword.control.ru');
+        has('为' + suffix, '为', 'keyword.operator.word.ru');
+        has('终' + suffix, '终', 'keyword.control.end.ru');
+        const config = require('../language-configuration.json');
+        const decrease = new RegExp(config.indentationRules.decreaseIndentPattern);
+        for (const word of ['法', '为', '象', '然', '环', '终', '}']) assert.ok(decrease.test(word + suffix), word + suffix);
+    }
+    // Headers remain visible in both legacy optional-colon and recommended forms.
+    for (const line of ['形 点', '形 点:', '形 点：']) has(line, '点', 'entity.name.type.ru');
+});
