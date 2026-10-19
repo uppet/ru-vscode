@@ -31,6 +31,35 @@ exports.run = async () => {
     const commands = await vscode.commands.getCommands();
     assert.ok(commands.includes('ru.runFile'));
     assert.ok(commands.includes('ru.runFileNative'));
+    const packageSource='吾 解. declaration 释. 言 工程 其 𠀀模块。\n力 取 外言 物理 其 排序.\n吾 取 1. 言 取 2.\n算 f: 吾 言 工程. 法.\n试: 卒 ‘失败’. 救 原因: 显 原因. 终. 吾 言 工程.';
+    const packageDoc=await vscode.workspace.openTextDocument({language:'ru',content:packageSource});
+    for(const [line,col] of [[0,0],[0,20],[1,12]]) {
+        const found=await vscode.commands.executeCommand('vscode.executeHoverProvider',packageDoc.uri,new vscode.Position(line,col));
+        assert.ok(found.some(h=>h.contents.some(c=>c.value?.includes('0.22.0'))),'package hover registered');
+    }
+    for(const [line,col] of [[2,0],[2,7],[3,5]]) {
+        const found=await vscode.commands.executeCommand('vscode.executeHoverProvider',packageDoc.uri,new vscode.Position(line,col));
+        assert.ok(!found.some(h=>h.contents.some(c=>c.value?.includes('模块声明'))),'ordinary or nested declaration name is not a keyword');
+    }
+    const afterTry=await vscode.commands.executeCommand('vscode.executeHoverProvider',packageDoc.uri,packageDoc.positionAt(packageSource.lastIndexOf('吾')));
+    assert.ok(afterTry.some(h=>h.contents.some(c=>c.value?.includes('模块声明'))),'module declaration after try/rescue is highlighted and explained');
+    const semantic=await vscode.commands.executeCommand('vscode.provideDocumentSemanticTokens',packageDoc.uri);
+    const legend=await vscode.commands.executeCommand('vscode.provideDocumentSemanticTokensLegend',packageDoc.uri);
+    assert.deepEqual(legend.tokenTypes,['keyword','namespace']);
+    assert.equal(semantic.data.length,12*5,'complete declarations including after try/rescue and named import semantic tokens');
+    const manifestFile=path.join(root,'集录.ru');
+    await fs.writeFile(manifestFile,"典: '名' 对 '工程'. '公开' 对 ['力学']. 成.\n");
+    const manifestDoc=await vscode.workspace.openTextDocument(manifestFile);
+    const manifestHover=await vscode.commands.executeCommand('vscode.executeHoverProvider',manifestDoc.uri,new vscode.Position(0,5));
+    assert.ok(manifestHover.some(h=>h.contents.some(c=>c.value?.includes('静态包清单'))));
+    for(const name of ['具名模块声明','具名模块导入','具名全量导入','静态包清单']) {
+        const doc=await vscode.workspace.openTextDocument({language:'ru',content:''});
+        const editor=await vscode.window.showTextDocument(doc); editor.options={insertSpaces:true,tabSize:4};
+        const body=require('../snippets/ru.json')[name].body.join('\n');
+        await editor.insertSnippet(new vscode.SnippetString(body));
+        const expected=body.replace(/\$\{\d+:([^}]*)\}/g,'$1').replace('$0','').replaceAll('\t','    ');
+        assert.equal(doc.getText(),expected,name);
+    }
     const nativeHelp = await vscode.workspace.openTextDocument({ language: 'ru', content: "密 取 外言 '如:密'.\n见 取 外言 '如见'.\nu64 取 1." });
     for (const line of [0, 1]) {
         const hovers = await vscode.commands.executeCommand('vscode.executeHoverProvider', nativeHelp.uri, new vscode.Position(line, 8));

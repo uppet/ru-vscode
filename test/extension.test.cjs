@@ -8,13 +8,17 @@ const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'ru extension '));
 function setup(options = {}) {
     let endTask;
     const commands = {};
+    let semanticProvider;
     const messages = [], executions = [], events = [];
     const file = path.join(tmp, '题 目;$(bad).ru');
     const document = { languageId: 'ru', isUntitled: false, isDirty: false, isClosed: false, version: 1, getText: () => '显 1.',
         uri: { scheme: 'file', fsPath: file, toString: () => file },
         save: async () => { events.push('save'); document.isUntitled = false; document.isDirty = false; return true; }, ...options.document };
     const api = {
-        languages: { registerHoverProvider: () => ({ dispose() {} }) },
+        languages: { registerHoverProvider: () => ({ dispose() {} }), registerDocumentSemanticTokensProvider: (_selector, provider) => { semanticProvider=provider; return { dispose() {} }; } },
+        SemanticTokensLegend: class {},
+        SemanticTokensBuilder: class { values=[]; push(range,type) { this.values.push({range,type}); } build() { return this.values; } },
+        Range: class { constructor(start,end) { this.start=start; this.end=end; } },
         window: { activeTextEditor: { document },
             showWarningMessage: async (...args) => { messages.push(args); return options.choice; },
             showInformationMessage: async m => { messages.push(m); }, showErrorMessage: async m => { messages.push(m); } },
@@ -31,8 +35,16 @@ function setup(options = {}) {
     Module._load = function (name, ...args) { return name === 'vscode' ? api : name === 'node:fs/promises' && options.stat ? { stat: options.stat } : load.call(this, name, ...args); };
     delete require.cache[require.resolve('../out/extension')];
     try { require('../out/extension').activate({ subscriptions: [] }); } finally { Module._load = load; }
-    return { command: commands['ru.runFile'], nativeCommand: commands['ru.runFileNative'], endTask: () => endTask({ execution: { task: executions.at(-1) } }), messages, executions, document, api, events };
+    return { command: commands['ru.runFile'], nativeCommand: commands['ru.runFileNative'], semanticProvider, endTask: () => endTask({ execution: { task: executions.at(-1) } }), messages, executions, document, api, events };
 }
+test('registered semantic provider uses UTF-16 offsets and leaves manifests and ordinary identifiers alone', () => {
+    const x=setup(); const source='吾 言 工程 其 𠀀模块.\n力 取 外言 物理 其 排序.\n吾 取 1.';
+    const document={uri:{fsPath:'/p/code.ru'},getText:()=>source,positionAt:offset=>offset};
+    const values=x.semanticProvider.provideDocumentSemanticTokens(document);
+    assert.equal(values.length,9);
+    assert.deepEqual(values.filter(t=>t.type==='namespace').map(t=>source.slice(t.range.start,t.range.end)),['工程','𠀀模块','物理','排序']);
+    document.uri.fsPath='/p/集录.ru'; assert.deepEqual(x.semanticProvider.provideDocumentSemanticTokens(document),[]);
+});
 test('run uses ProcessExecution with interactive terminal, exact Unicode argv and cwd', async () => {
     const x = setup(); await x.command();
     assert.equal(x.executions.length, 1);
@@ -57,6 +69,21 @@ test('untrusted, wrong-language and virtual documents do not execute', async () 
     for (const opts of [{ trusted: false }, { document: { languageId: 'text' } }, { document: { uri: { scheme: 'git', toString: () => 'git:sample', fsPath: '/bad' } } }]) {
         const x = setup(opts); await x.command(); assert.equal(x.executions.length, 0); assert.ok(x.messages.length);
     }
+});
+test('static manifests refuse ordinary and native runs before save or consent', async () => {
+    for(const dirty of [false,true]) for(const native of [false,true]) {
+        const file=path.join(tmp,'集录.ru');
+        const x=setup({document:{isDirty:dirty,uri:{scheme:'file',fsPath:file,toString:()=>file}},choice:'允许原生运行一次'});
+        await (native?x.nativeCommand():x.command());
+        assert.equal(x.executions.length,0); assert.deepEqual(x.events,[]);
+        assert.equal(x.messages.length,1); assert.match(x.messages[0],/静态包清单/);
+    }
+});
+test('Save As to a static manifest never launches it', async () => {
+    const x=setup({document:{isUntitled:true},choice:'保存并运行'});
+    const file=path.join(tmp,'集录.ru');
+    x.document.save=async()=>{ x.api.window.activeTextEditor.document={...x.document,isUntitled:false,uri:{scheme:'file',fsPath:file,toString:()=>file}}; return true; };
+    await x.command(); assert.equal(x.executions.length,0); assert.ok(x.messages.some(m=>typeof m==='string' && m.includes('静态包清单')));
 });
 test('repeated invocation refuses live process, then allows completed task and reuses stable identity', async () => {
     const x = setup(); await Promise.all([x.command(), x.command()]); await x.command();

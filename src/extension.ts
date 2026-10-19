@@ -2,17 +2,30 @@ import * as vscode from 'vscode';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { hoverAt } from './hover';
+import { isPackageManifest, packageTokens } from './packages';
 import { buildLaunchPlan, RunSettings } from './launch';
 
 /** No subprocess is created during activation or while editing. */
 export function activate(context: vscode.ExtensionContext): void {
     context.subscriptions.push(vscode.languages.registerHoverProvider('ru', {
         provideHover(document, position) {
-            const result = hoverAt(document.getText(), document.offsetAt(position));
+            const result = hoverAt(document.getText(), document.offsetAt(position), document.uri.fsPath);
             if (!result) { return undefined; }
             return new vscode.Hover(result.text, new vscode.Range(document.positionAt(result.start), document.positionAt(result.end)));
         }
     }));
+    const legend = new vscode.SemanticTokensLegend(['keyword', 'namespace']);
+    context.subscriptions.push(vscode.languages.registerDocumentSemanticTokensProvider('ru', {
+        provideDocumentSemanticTokens(document) {
+            const builder = new vscode.SemanticTokensBuilder(legend);
+            if (!isPackageManifest(document.uri.fsPath)) {
+                for (const token of packageTokens(document.getText())) {
+                    builder.push(new vscode.Range(document.positionAt(token.start), document.positionAt(token.end)), token.type);
+                }
+            }
+            return builder.build();
+        }
+    }, legend));
     // Both commands share reservations, including the time spent awaiting consent/save.
     const fileKey = (file: string) => process.platform === 'win32' ? path.normalize(file).toLowerCase() : file;
     const pending = new Set<string>();
@@ -29,6 +42,10 @@ export function activate(context: vscode.ExtensionContext): void {
         }
         if (!document || document.languageId !== 'ru') {
             void vscode.window.showInformationMessage('如言: 请先打开一个 .ru 文件。');
+            return;
+        }
+        if (isPackageManifest(document.uri.fsPath)) {
+            void vscode.window.showInformationMessage('如言: 集录.ru 是静态包清单，不能作为源码运行。请打开入口 .ru 文件；远程依赖需显式执行 ru deps sync 项目目录。');
             return;
         }
         if (allowNative && (document.isUntitled || document.uri.scheme !== 'file')) {
@@ -68,7 +85,7 @@ export function activate(context: vscode.ExtensionContext): void {
                 const action = mustSave ? '保存并允许原生运行一次' : '允许原生运行一次';
                 const choice = await vscode.window.showWarningMessage('如言: 允许此文件运行原生代码？', {
                     modal: true,
-                    detail: `文件：${document.uri.fsPath}\n\n原生代码将通过当前配置的解释器，以当前账户权限运行，可读写文件、访问网络或调用操作系统；错误可能导致进程崩溃。此授权不是安全沙箱，也不限制导入模块或动态库。仅允许本次运行，不会保存长期授权。\n\n如:密／如见目前仅支持本地 Windows x64 Python；支持情况由配置的解释器判断。`
+                    detail: `文件：${document.uri.fsPath}\n\n原生代码将通过当前配置的解释器，以当前账户权限运行，可读写文件、访问网络或调用操作系统；错误可能导致进程崩溃。此授权不是安全沙箱，也不限制导入模块或动态库。仅允许本次运行，不会保存长期授权。\n\n本次命令使用本地 Windows x64 Python；支持情况由配置的解释器判断。工具链另支持显式 build --allow-native 的 Windows x64 C 后端，本命令不会构建或运行 C 产物。`
                 }, action);
                 if (choice !== action) { return; }
                 assertNativeTarget();
@@ -93,6 +110,7 @@ export function activate(context: vscode.ExtensionContext): void {
                 throw new Error('请将文件保存到当前扩展宿主的磁盘；不支持运行虚拟文档。');
             }
             const file = document.uri.fsPath;
+            if (isPackageManifest(file)) { throw new Error('集录.ru 是静态包清单，不能作为源码运行。'); }
             const key = fileKey(file);
             const existing = vscode.tasks.taskExecutions.some(execution => execution.task.definition.type === 'ru'
                 && execution.task.definition.file === key);

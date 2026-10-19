@@ -11,6 +11,9 @@ assert name in {"原生机器值", "如见绑定概览"}
 sys.path.insert(0, str(root))
 from rulang.frontend import parse
 parse(file.read_text(encoding="utf-8"))
+checked = subprocess.run([sys.executable, "-X", "utf8", str(root / "ru"), "check", "--target", "c", "--allow-native", str(file)],
+                         capture_output=True, text=True, encoding="utf-8", timeout=20)
+assert checked.returncode == 0, checked.stderr
 
 
 def run(*flags):
@@ -24,7 +27,7 @@ supported = sys.platform == "win32" and ctypes.sizeof(ctypes.c_void_p) == 8 and 
 if not supported:
     denied = run("--allow-native")
     assert denied.returncode != 0 and "Windows x64" in denied.stderr, denied.stderr
-    print(f"{name}: parsed; default capability and unsupported-platform denial verified; no native code loaded.")
+    print(f"{name}: parsed; explicit C static check, default capability and unsupported-platform denial verified; no native code loaded.")
 elif os.environ.get("RU_NATIVE_SNIPPET_TESTS") == "1":
     # Both fixed snippets are non-GUI. 如见 binds only its shipped System32 DLL declarations.
     result = run("--allow-native")

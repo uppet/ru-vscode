@@ -279,3 +279,16 @@ test('canonical import-all and retired spelling have explicit whole-token migrat
 test('scope help shows the complete statement period', () => {
     assert.ok(hoverAt('段:', 0).text.includes('{ … }.'));
 });
+test('native help distinguishes explicit Windows x64 Python and C support from this run command', () => {
+    for(const source of ["外言 '如:密'.","外言 '如见'.",'外言']) {
+        const text=hoverAt(source,source.length>2?5:0).text;
+        for(const term of ['Windows x64','Python','C 后端','build --allow-native','check --target c --allow-native','静态检查','如书','JS / browser-js 不支持','本扩展命令仍只运行配置的 Python']) assert.ok(text.includes(term),term);
+        assert.ok(!text.includes('C / JS / browser-js 不支持'));
+        assert.ok(!text.includes('C / JS / browser-js 目标不支持'));
+    }
+    for(const name of ['原生机器值','如见绑定概览']) {
+        const description=require('../snippets/ru.json')[name].description;
+        assert.ok(description.includes('C须显式build --allow-native'));
+        assert.ok(!description.includes('如书/C/JS不支持'));
+    }
+});

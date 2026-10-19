@@ -12,6 +12,8 @@ const interpreterPath = process.env.RU_PYTHON || (process.platform === 'win32' ?
 const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'ru vscode smoke '));
 try {
     for (const [name, snippet] of Object.entries(require('../snippets/ru.json'))) {
+        // The manifest is data, and named imports require a complete local package fixture.
+        if (['具名模块声明','具名模块导入','具名全量导入','静态包清单'].includes(name)) continue;
         const defaults = {};
         let source = snippet.body.join('\n').replace(/\$\{(\d+):([^}]*)\}/g, (_, key, value) => (defaults[key] = value))
             .replace(/\$\{(\d+)\}/g, (_, key) => defaults[key]).replaceAll('$0', '');
@@ -79,6 +81,9 @@ try {
             }
         }
     }
+    const packages = cp.spawnSync(interpreterPath, [path.join(__dirname, 'package-snippet-smoke.py'), path.resolve(root), path.join(__dirname, '../snippets/ru.json')], { encoding: 'utf8', timeout: 180000 });
+    assert.equal(packages.status, 0, packages.stderr || String(packages.error));
+    process.stdout.write(packages.stdout);
     for (const [oldName, canonical] of [['如竞', '如:竞'], ['如观', '如:观'], ['如:竞赛', '如:竞']]) {
         const oldModuleFile = path.join(temp, 'legacy-module.ru');
         fs.writeFileSync(oldModuleFile, `模块 取 外言 '${oldName}'.\n`);

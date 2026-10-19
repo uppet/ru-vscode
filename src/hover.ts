@@ -1,4 +1,5 @@
 /** Lexical help only: this scanner never resolves a binding or executes source. */
+import { packageHoverAt } from './packages';
 const start = /[\p{L}_]/u;
 const part = /[\p{L}\p{N}_]/u;
 const help: Record<string, string> = {
@@ -19,10 +20,11 @@ const help: Record<string, string> = {
     '形': '形：声明类型名\n\n形名用于类型标注、如继承与新构造，不是可赋值、传参或返回的普通值。'
 };
 const nativeModuleHelp: Record<string, string> = {
-    '如:密': '如:密（Ru 0.20.0+）：标准库中的机器 ABI 桥接。i8/u8/i16/u16/i32/u32/i64/u64、intptr/uintptr、f32/f64、指针、结构、UTF8/UTF16、缓冲、签名和回调都是普通模块导出，不是语言保留字。\n\n整数原生值可从十进制句精确构造；超出安全整数范围时用其 句保留精度，不能当作普通数运算。UTF16 缓冲需显式关闭。原生调用有内存、生命周期及崩溃风险，不是沙箱。\n\n目前仅支持本地 Windows x64 Python 解释器。默认关闭，须用命令面板“如言: 原生运行当前文件（需确认）”逐次确认，或 ru run --allow-native 文件.ru。普通运行不授权；如书、C / JS / browser-js 目标不支持。平台以实际配置的 Python 解释器为准，不按编辑器架构判断。',
-    '如见': "如见（Ru 0.20.0+）：随工具链发布的第三方如库，用 外言 '如见'；不是如:见，也不是语言内建 GUI。它以如:密声明 Win32 ABI 并封装窗口、按钮和消息循环，导入时会绑定 Windows 系统 DLL。\n\n目前仅支持本地 Windows x64 Python 解释器，默认关闭。须逐次确认原生运行或使用 ru run --allow-native 文件.ru；如书、C / JS / browser-js 不支持。实际平台由配置的 Python 解释器决定。窗口和回调须按库生命周期释放；错误的原生代码可能导致进程崩溃，授权不是安全沙箱。"
+    '如:密': '如:密（Ru 0.20.0+）：标准库中的机器 ABI 桥接。i8/u8/i16/u16/i32/u32/i64/u64、intptr/uintptr、f32/f64、指针、结构、UTF8/UTF16、缓冲、签名和回调都是普通模块导出，不是语言保留字。\n\n整数原生值可从十进制句精确构造；超出安全整数范围时用其 句保留精度，不能当作普通数运算。UTF16 缓冲需显式关闭。原生调用有内存、生命周期及崩溃风险，不是沙箱。\n\n执行平台仅为 Windows x64；支持本地 Python，Ru 0.21.0+ 也支持显式启用的 C 后端。默认关闭，Python 运行须用命令面板“如言: 原生运行当前文件（需确认）”逐次确认，或 ru run --allow-native 文件.ru。普通运行不授权。C 后端须显式 ru build --allow-native 并使用 Windows x64 工具链；ru check --target c --allow-native 仅静态检查，不执行或加载 DLL。如书、JS / browser-js 不支持。本扩展命令仍只运行配置的 Python，不自动构建 C；Python 平台以实际解释器为准，不按编辑器架构判断。',
+    '如见': "如见（Ru 0.20.0+）：随工具链发布的第三方如库，用 外言 '如见'；不是如:见，也不是语言内建 GUI。它以如:密声明 Win32 ABI 并封装窗口、按钮和消息循环，导入时会绑定 Windows 系统 DLL。\n\n执行平台仅为 Windows x64；本地 Python 默认关闭，须逐次确认原生运行或使用 ru run --allow-native 文件.ru。Ru 0.21.0+ 也支持显式 ru build --allow-native 的 C 后端，须 Windows x64 工具链；ru check --target c --allow-native 仅静态检查，不执行或加载 DLL。如书、JS / browser-js 不支持。本扩展命令仍只运行配置的 Python，不自动构建 C。窗口和回调须按库生命周期释放；错误的原生代码可能导致进程崩溃，授权不是安全沙箱。"
 };
-help['外言'] += "\n\n机器类型桥接用 外言 '如:密'；随工具链发布的第三方 Win32 库用 外言 '如见'，不是如:见。二者目前仅支持本地 Windows x64 Python，默认关闭，须逐次确认原生运行（run --allow-native 在文件名前），如书、C / JS / browser-js 不支持。模块导出仍是普通名称；实际平台以配置的 Python 为准。";
+help['外言'] += '\n\nRu 0.22.0 开发版支持具名 外言 物理 其 力学；整条其链是静态模块名。作者声明使用正式名，消费者可用依赖别名。集录.ru仅静态数据；run / check / build不联网，缺少缓存须显式ru deps sync；默认按有效锁恢复，--locked要求已有有效锁，--update才重新选择，错误后不自动改用update。browser-js仍只允许固定标准库。';
+help['外言'] += "\n\n机器类型桥接用 外言 '如:密'；随工具链发布的第三方 Win32 库用 外言 '如见'，不是如:见。二者执行平台仅为 Windows x64；本地 Python 默认关闭，须逐次确认原生运行（run --allow-native 在文件名前）。Ru 0.21.0+ 的 C 后端须显式 build --allow-native 和 Windows x64 工具链；check --target c --allow-native 只做静态检查。本扩展命令仍只运行配置的 Python；如书、JS / browser-js 不支持。模块导出仍是普通名称；Python 平台以配置的解释器为准。";
 const memberHelp: Record<string, string> = {
     "缓存": "如观画布成员（Ru 0.19.8／如书 0.8.8）\n\n缓存 宽 高 绘制：三参均必需；命名参数为宽:、高:、绘制:，同次调用不混用位置和命名实参。返回不可变图像，图像只有只读宽、高。宽高为1～2048整数，拒绝事实、空、小数及非有限数。\n\n只在初始化录制一次；绘制须为恰好接收一个临时绘图目标的算／作，返回值忽略。目标默认透明、独立默认样式、单位变换、无裁剪；支持纯绘图、样式、变换与矩形裁剪，保存／恢复须配对。不支持时间、事件、帧率、关闭、嵌套缓存或贴图；录制时不能调用主画布副作用或替换主画布。录制结束无论成功失败，临时目标都失效。每帧／输入回调不能创建缓存。\n\n每画布最多8张，合计4,194,304像素／128 KiB资源定义，单张最多2047条配方命令；每帧根命令加实际引用的唯一配方命令最多2048。定义仍逐帧传输与校验，不承诺60fps；无外部图片加载或导出。关闭／重跑后旧图像不能再贴。\n\n仅在如书 Python / browser-js 绘图宿主可用，普通 CLI／check 不支持画布。这里只按其后的普通成员名提供词法提示，不判断接收者类型；用户同名成员按其声明。",
     "贴图": "如观画布成员（Ru 0.19.8／如书 0.8.8）\n\n贴图 图像 横 纵：三参均必需；命名参数为图像:、横:、纵:，同次调用不混用位置和命名实参，返回空。图像须为当前画布创建的不可变缓存图像；横纵为绝对值不超过100000的有限数，拒绝事实、空与句。\n\n按原始宽高1:1绘制，沿用主画布变换／裁剪，透明像素使用source-over；填色／描边／线宽不重新着色。不乘设备像素比；缩放、旋转、翻转沿用变换，放大可能模糊。空图或完全裁掉仍计绘图命令，每帧仍需完整重画。停／继续保留图像，关闭、重跑、替换画布或新格使旧图像失效；旧图像宽高仍可读。\n\n仅在如书 Python / browser-js 绘图宿主可用，普通 CLI／check 不支持画布。这里只按其后的普通成员名提供词法提示，不判断接收者类型；用户同名成员按其声明。",
@@ -59,7 +61,9 @@ const memberHelp: Record<string, string> = {
     '弹': '弹：阵成员（Ru 0.12.0+）\n\n阵 其 弹. 无参数，裸成员访问即可调用，不写()。原地移出末项并返回原元素；空阵报普通运行错误，不能由救捕获，安全使用先看量。别名共享修改，移出空元素也正常返回空。\n\n仅按其后的普通成员名提示，不判断接收者类型；同名自定义成员可能不同。',
     '查': '查：普通成员名\n\n阵（Ru 0.12.0+）：阵 其 查 值:目标. 返回第一个相等项的零起点位置，未找到返回空，不修改阵。按开始时的浅元素快照从左到右使用既有相等协议比较；比较若修改原阵，返回位置仍是快照位置。\n\n典（命名参数需 Ru 0.12.1+）：典 其 查 目:目标. 按目返回相，未找到返回空。\n\n仅按其后的名称提示，不判断接收者类型；同名自定义成员可能不同。'
 };
-export function hoverAt(source: string, offset: number): { start: number; end: number; text: string } | undefined {
+export function hoverAt(source: string, offset: number, fileName = ''): { start: number; end: number; text: string } | undefined {
+    const packageHelp = packageHoverAt(source, offset, fileName);
+    if (packageHelp) { return packageHelp; }
     let i = 0;
     let previousWord = "", previousEnd = 0;
     const char = () => String.fromCodePoint(source.codePointAt(i)!);

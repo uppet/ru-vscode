@@ -14,6 +14,18 @@ before(async () => {
 });
 function scopes(line, index, stack) { return grammar.tokenizeLine(line, stack).tokens.find(t => t.startIndex <= index && t.endIndex > index).scopes; }
 function has(line, fragment, scope) { assert.ok(scopes(line, line.indexOf(fragment)).includes(scope), `${fragment} in ${line}: ${scopes(line, line.indexOf(fragment))}`); }
+test('named imports retain static namespace chains and stop before real members', () => {
+    for (const name of ['排序','段','量','缓存','宽','𠀀模块']) {
+        has(`力 取 外言 工程 其 ${name}.`,name,'entity.name.namespace.ru');
+        has(`尽取 外言 工程 其 流体 其 ${name}。`,name,'entity.name.namespace.ru');
+    }
+    const line='显 (外言 工程 其 力学) 其 排序.';
+    has(line,'力学','entity.name.namespace.ru'); has(line,'排序','support.function.member.ru');
+    has("力 取 外言 '如:数学'.",'如:数学','string.quoted.ru');
+    for (const word of ['吾','言','吾言','言语']) has(`${word} 取 1.`,word,'variable.other.ru');
+    const state=grammar.tokenizeLine('外言 工程 # comment').ruleStack;
+    assert.ok(scopes('其 流体 其 排序.',7,state).includes('entity.name.namespace.ru'));
+});
 test('keywords use full Unicode identifier boundaries', () => {
     for (const id of ['为乐', '显值', '算子', '取3', '_若', 'α算', '算²', '形状']) { has(id, id, 'variable.other.ru'); }
     has('若 值 则', '若', 'keyword.control.ru');
