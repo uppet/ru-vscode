@@ -184,7 +184,7 @@
     "test": "npm run compile && node --test test/*.test.cjs",
     "test:integration": "npm run compile && node test/run-integration.cjs",
     "vscode:prepublish": "npm run compile",
-    "package": "vsce package --no-dependencies --out ru-vscode-0.8.6.vsix",
+    "package": "vsce package --no-dependencies",
     "check": "npm run lint && npm test && npm run package",
     "test:ru": "npm run compile && node test/real-ru-smoke.cjs"
   },
