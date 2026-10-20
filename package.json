@@ -4,7 +4,7 @@
   "description": "如言 language support: syntax highlighting, snippets, and interactive Run Current File.",
   "version": "0.8.6",
   "publisher": "uppet",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "private": true,
   "engines": {
     "vscode": "^1.90.0"
