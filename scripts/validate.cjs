@@ -11,6 +11,12 @@ assert.ok(!Object.keys(pkg.contributes.configuration.properties).some(key => /na
 assert.equal(pkg.capabilities.untrustedWorkspaces.supported, 'limited');
 assert.deepEqual(pkg.capabilities.untrustedWorkspaces.restrictedConfigurations.sort(), Object.keys(pkg.contributes.configuration.properties).sort());
 assert.ok(!pkg.scripts.publish, 'No marketplace publishing script.');
+
+const changelog = fs.readFileSync('CHANGELOG.md', 'utf8');
+const headerMatch = /^## ([0-9]+\.[0-9]+\.[0-9]+)\s*$/m.exec(changelog);
+assert.ok(headerMatch, 'CHANGELOG.md must start with a "## <version>" heading');
+assert.equal(headerMatch[1], pkg.version,
+    `CHANGELOG.md header ${headerMatch[1]} does not match package.json version ${pkg.version}`);
 for (const snippet of Object.values(require('../snippets/ru.json'))) {
     assert.ok(Array.isArray(snippet.body) && snippet.body.length);
     assert.ok(snippet.description);

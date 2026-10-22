@@ -1,9 +1,10 @@
 ## 0.8.7 conditional-chain support · 2026-10-22
 
 - Reconstructed and blob-verified public `main` `408cdf1e2a5219c69670f44f125a371d9cd0d427` before editing. This source is prepared for the authorized feature-branch CI and main integration; no release or Marketplace publication is part of this change.
+- Wip integration preserves the existing `641cd1fdf640607022a3dacb95867a6d2bc8d67b` dynamic VSIX filename and CHANGELOG/package version validation; only the conditional-chain changes are layered on top.
 - Added whole-word `另若` grammar, reserved import exclusion, lexical same-chain handling, sibling indentation, hover, and a single-`然` snippet. Longer identifiers, strings/comments and legacy spaced `另 若` remain distinct. No formatter rewrites were introduced.
 - `npm run lint` and all 97 `npm test` cases pass. `RU_LANGUAGE_ROOT=../../core npm run test:ru` passes against the local Ru 0.23.0 candidate, including checking and actually running the new snippet with output `2\n`; existing Python/check/C/Node.js package and graphics smoke checks pass too. This records the tested toolchain source, not a claim that a compiler is bundled or automatically upgraded.
-- `npm run package` passes. VSIX ZIP integrity, version and bundled bytes match the final tree (including the expected VSCE README license-link rewrite): 13 entries, 57,104 bytes, SHA-256 `ad48e2b05db0f1dbe8ab03c45ca6d2943c784e76d518077c1bb3a8f23f9fa846`.
+- `npm run package` passes. The original pre-integration local preview passed VSIX ZIP integrity, version and bundled-byte checks (including the expected VSCE README license-link rewrite); its historical artifact was: 13 entries, 57,104 bytes, SHA-256 `ad48e2b05db0f1dbe8ab03c45ca6d2943c784e76d518077c1bb3a8f23f9fa846`.
 - Real Electron/VSCode GUI integration was extended but not run locally: no display or Xvfb is installed. Exact-commit GUI CI remains required. No Windows execution or native FFI performance claim is made.
 
 ## 0.8.6 final review corrections · 2026-10-19
