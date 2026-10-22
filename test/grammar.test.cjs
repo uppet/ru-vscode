@@ -373,3 +373,22 @@ test('statement-ending dots preserve old and new highlighting and indentation', 
     // Headers remain visible in both legacy optional-colon and recommended forms.
     for (const line of ['形 点', '形 点:', '形 点：']) has(line, '点', 'entity.name.type.ru');
 });
+
+test('else-if chains highlight whole keywords and indent as sibling branches', () => {
+    has('另若 真 则', '另若', 'keyword.control.ru');
+    has('另 若 真 则', '另', 'keyword.control.ru');
+    has('另 若 真 则', '若', 'keyword.control.ru');
+    for (const id of ['另若值', '甲另若', '_另若', '另若2', '𠀀另若']) has(id, id, 'variable.other.ru');
+    for (const line of ['# 另若', '批. 另若', '解. 另若 释.']) assert.ok(scopes(line,line.indexOf('另若')).some(x => x.startsWith('comment.')));
+    has("'另若'", '另若', 'string.quoted.ru');
+    const c = require('../language-configuration.json');
+    const inc = new RegExp(c.indentationRules.increaseIndentPattern);
+    const dec = new RegExp(c.indentationRules.decreaseIndentPattern);
+    for (const line of ['另若 真 则', '    另若 值 > 0 则', '另若 真 则 # 分支']) { assert.ok(inc.test(line),line); assert.ok(dec.test(line),line); }
+    for (const line of ['另若值 真 则', '甲另若 真 则', '# 另若 真 则', "'另若 真 则'"]) { assert.ok(!inc.test(line),line); assert.ok(!dec.test(line),line); }
+    assert.ok(!inc.test('另 若 真 则'), 'legacy nested source must not become sibling indentation rule');
+    const snippet = require('../snippets/ru.json')['多分支条件'];
+    assert.equal(snippet.body.filter(line => line === '然.').length,1);
+    assert.ok(snippet.body.some(line=>line.startsWith('另若 ')));
+    assert.ok(snippet.description.includes('0.23.0'));
+});

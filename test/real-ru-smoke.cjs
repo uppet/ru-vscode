@@ -59,6 +59,7 @@ try {
             assert.match(graphics.stderr, /如书/);
         }
         const expectedPractical = {
+            '多分支条件': '2\n',
             '透明颜色': '#ff404080\n#4070ff80\n',
             '文本整理': '[小明, 小红]\n你好\n梨\n3.50\n',
             '数学计算': '9\n32\n-1\n-2\n-1\n-2\n',
