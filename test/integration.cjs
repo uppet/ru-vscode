@@ -31,6 +31,14 @@ exports.run = async () => {
     const commands = await vscode.commands.getCommands();
     assert.ok(commands.includes('ru.runFile'));
     assert.ok(commands.includes('ru.runFileNative'));
+    const elifDoc = await vscode.workspace.openTextDocument({language:'ru',content:'若 假 则\n显 1.\n另若 真 则\n显 2.\n然.'});
+    const elifHover = await vscode.commands.executeCommand('vscode.executeHoverProvider', elifDoc.uri, new vscode.Position(2,1));
+    assert.ok(elifHover.some(h => h.contents.some(c => c.value?.includes('0.23.0') && c.value.includes('一个然'))), 'else-if hover registered');
+    const elifSnippetDoc = await vscode.workspace.openTextDocument({language:'ru',content:''});
+    const elifEditor = await vscode.window.showTextDocument(elifSnippetDoc);
+    await elifEditor.insertSnippet(new vscode.SnippetString(require('../snippets/ru.json')['多分支条件'].body.join('\n')));
+    assert.ok(elifSnippetDoc.getText().includes('另若 真 则'), 'else-if snippet inserts sibling branch');
+    assert.equal(elifSnippetDoc.getText().split('然.').length-1,1,'else-if snippet has one closer');
     const packageSource='吾 解. declaration 释. 言 工程 其 𠀀模块。\n力 取 外言 物理 其 排序.\n吾 取 1. 言 取 2.\n算 f: 吾 言 工程. 法.\n试: 卒 ‘失败’. 救 原因: 显 原因. 终. 吾 言 工程.';
     const packageDoc=await vscode.workspace.openTextDocument({language:'ru',content:packageSource});
     for(const [line,col] of [[0,0],[0,20],[1,12]]) {

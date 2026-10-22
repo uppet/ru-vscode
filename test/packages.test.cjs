@@ -75,3 +75,9 @@ test('package snippet defaults and versions preserve full-stop style and static 
     const config=require('../language-configuration.json');
     assert.equal(new RegExp(config.indentationRules.increaseIndentPattern).test('吾 言 工程 其 力学.'),false);
 });
+
+test('else-if is reserved without adding a package nesting frame', () => {
+    for(const source of ['吾 言 另若.', '外言 另若.', '外言 工程 其 另若.']) assert.ok(!marked(source).some(([v,t])=>v==='另若' && t==='namespace'),source);
+    assert.ok(marked('吾 言 另若值.').some(([v,t])=>v==='另若值' && t==='namespace'));
+    assert.ok(marked('若 假 则 显 1. 另若 真 则 显 2. 然. 吾 言 工程.').some(([v,t])=>v==='工程' && t==='namespace'));
+});

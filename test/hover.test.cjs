@@ -292,3 +292,9 @@ test('native help distinguishes explicit Windows x64 Python and C support from t
         assert.ok(!description.includes('如书/C/JS不支持'));
     }
 });
+
+test('else-if hover states one closer and preserves legacy nested spelling', () => {
+    const text=hoverAt('另若 真 则',1).text;
+    for (const phrase of ['0.23.0','一个然','另 若','惰性','0也为真','不新增作用域']) assert.ok(text.includes(phrase),phrase);
+    for (const source of ['另若值','甲另若','𠀀另若','另若2','# 另若','批. 另若','解. 另若 释.',"'另若'"]) assert.equal(hoverAt(source,source.indexOf('另若')),undefined,source);
+});
