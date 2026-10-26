@@ -31,6 +31,18 @@ exports.run = async () => {
     const commands = await vscode.commands.getCommands();
     assert.ok(commands.includes('ru.runFile'));
     assert.ok(commands.includes('ru.runFileNative'));
+    const continueDoc = await vscode.workspace.openTextDocument({language:'ru',content:'循 2 次\n续.\n环.\n继续 取 1.\n# 续.'});
+    const continueHovers = await vscode.commands.executeCommand('vscode.executeHoverProvider', continueDoc.uri, new vscode.Position(1,0));
+    assert.ok(continueHovers.some(h => h.contents.some(c => c.value?.includes('计次循环正常推进') && c.value.includes('不能跨函数或回调'))), 'continue hover registered');
+    for (const position of [new vscode.Position(3,1),new vscode.Position(4,2)]) {
+        const hidden = await vscode.commands.executeCommand('vscode.executeHoverProvider',continueDoc.uri,position);
+        assert.ok(!hidden.some(h=>h.contents.some(c=>c.value?.includes('续：'))),'continue hover hides longer names and comments');
+    }
+    const continueSnippetDoc = await vscode.workspace.openTextDocument({language:'ru',content:'循 2 次\n    '});
+    const continueEditor = await vscode.window.showTextDocument(continueSnippetDoc);
+    continueEditor.selection = new vscode.Selection(1,4,1,4);
+    await vscode.commands.executeCommand('editor.action.insertSnippet',{langId:'ru',name:'继续下一轮循环'});
+    assert.ok(continueSnippetDoc.getText().includes('    续.'),'continue snippet uses statement period');
     const elifDoc = await vscode.workspace.openTextDocument({language:'ru',content:'若 假 则\n显 1.\n另若 真 则\n显 2.\n然.'});
     const elifHover = await vscode.commands.executeCommand('vscode.executeHoverProvider', elifDoc.uri, new vscode.Position(2,1));
     assert.ok(elifHover.some(h => h.contents.some(c => c.value?.includes('0.23.0') && c.value.includes('一个然'))), 'else-if hover registered');

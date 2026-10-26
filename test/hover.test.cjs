@@ -298,3 +298,11 @@ test('else-if hover states one closer and preserves legacy nested spelling', () 
     for (const phrase of ['0.23.0','一个然','另 若','惰性','0也为真','不新增作用域']) assert.ok(text.includes(phrase),phrase);
     for (const source of ['另若值','甲另若','𠀀另若','另若2','# 另若','批. 另若','解. 另若 释.',"'另若'"]) assert.equal(hoverAt(source,source.indexOf('另若')),undefined,source);
 });
+
+test('continue hover explains counted loops and callable boundary without resolving context', () => {
+    for (const dot of ['.', '。']) {
+        const text=hoverAt(`续${dot}`,0).text;
+        for (const term of ['最内层循环','计次循环正常推进','不能跨函数或回调','不是块结束符','完.','不判断']) assert.ok(text.includes(term),term);
+    }
+    for (const source of ['继续','续值','α续','𠀀续','3续','续²','# 续.','批. 续.','解。续。释。',"'续.'",'“续。”']) assert.equal(hoverAt(source,source.indexOf('续')),undefined,source);
+});

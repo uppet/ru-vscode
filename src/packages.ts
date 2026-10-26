@@ -1,5 +1,5 @@
 /** Package syntax is lexical help only. No filesystem reads, resolution or downloads. */
-const reserved = new Set('显 取 为 得 完 破 若 则 另若 另 然 循 次 环 算 作 法 其 且 或 非 空 真 假 典 成 对 形 象 如 新 外言 尽取 尽 试 救 卒'.split(' '));
+const reserved = new Set('显 取 为 得 完 破 续 若 则 另若 另 然 循 次 环 算 作 法 其 且 或 非 空 真 假 典 成 对 形 象 如 新 外言 尽取 尽 试 救 卒'.split(' '));
 interface Token { value: string; start: number; end: number; kind: 'name' | 'string' | 'other' }
 export interface PackageToken { start: number; end: number; type: 'keyword' | 'namespace'; declaration: boolean }
 const declarationHelp = '吾 言：模块声明（Ru 0.22.0 开发版）\n\n吾 言 工程 其 力学. 仅模块顶层一次，必须完整并以句点结束；不执行、不建立变量或新缩进块。有包时须匹配作者正式名，消费者依赖别名不改变声明。吾、言不是全局关键词；旧调用若恰好写成完整声明，可用 吾 (言) 工程. 保留调用。这里只识别完整词法形状，不验证名字或重复声明。';

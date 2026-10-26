@@ -81,3 +81,10 @@ test('else-if is reserved without adding a package nesting frame', () => {
     assert.ok(marked('吾 言 另若值.').some(([v,t])=>v==='另若值' && t==='namespace'));
     assert.ok(marked('若 假 则 显 1. 另若 真 则 显 2. 然. 吾 言 工程.').some(([v,t])=>v==='工程' && t==='namespace'));
 });
+
+
+test('continue is reserved in static names but not a nesting boundary', () => {
+    for (const source of ['吾 言 续.', '外言 续.', '外言 工程 其 续.']) assert.ok(!marked(source).some(([v,t])=>v==='续' && t==='namespace'),source);
+    assert.ok(marked('吾 言 续值.').some(([v,t])=>v==='续值' && t==='namespace'));
+    assert.ok(marked('循 1 次 续. 环. 吾 言 工程.').some(([v,t])=>v==='工程' && t==='namespace'));
+});

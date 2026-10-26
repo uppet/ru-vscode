@@ -392,3 +392,17 @@ test('else-if chains highlight whole keywords and indent as sibling branches', (
     assert.ok(snippet.body.some(line=>line.startsWith('另若 ')));
     assert.ok(snippet.description.includes('0.23.0'));
 });
+
+test('续 is a whole continue keyword and not an indentation boundary', () => {
+    const config = require('../language-configuration.json');
+    for (const dot of ['.', '。']) {
+        has(`续${dot}`, '续', 'keyword.control.ru');
+        assert.ok(!new RegExp(config.indentationRules.decreaseIndentPattern).test(`续${dot}`));
+        assert.ok(!new RegExp(config.indentationRules.increaseIndentPattern).test(`续${dot}`));
+        for (const prefix of ['# ', '// ', '批. ', '批。 ']) has(prefix + `续${dot}`, '续', 'comment.line.ru');
+        has(`解. 续${dot} 释.`, '续', 'comment.block.ru');
+        for (const [a,z] of [["'","'"],['"','"'],['‘','’'],['“','”']]) has(a+`续${dot}`+z,'续','string.quoted.ru');
+    }
+    for (const id of ['继续','续值','续2','_续','α续','𠀀续','续²']) has(id,id,'variable.other.ru');
+    assert.deepEqual(require('../snippets/ru.json')['继续下一轮循环'].body,['续.','$0']);
+});
