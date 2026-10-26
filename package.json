@@ -2,7 +2,7 @@
   "name": "ru-vscode",
   "displayName": "如言 · Ru",
   "description": "如言 language support: syntax highlighting, snippets, and interactive Run Current File.",
-  "version": "0.8.7",
+  "version": "0.8.8",
   "publisher": "uppet",
   "license": "MIT",
   "private": true,
